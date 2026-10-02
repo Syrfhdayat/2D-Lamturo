@@ -1,0 +1,2712 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2D Lamturo WebGIS</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+html,body,#map{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Arial,sans-serif;
+}
+
+/* =========================
+   LOGO
+========================= */
+#head{
+    position:absolute;
+    z-index:2000;
+    left:10px;
+    top:10px;
+    background:#fff;
+    padding:8px 10px;
+    border-radius:10px;
+    box-shadow:0 2px 9px rgba(0,0,0,.25);
+    display:flex;
+    align-items:center;
+}
+
+#head img{
+    width:500px;
+    max-width:100%;
+    height:auto;
+    max-height:160px;
+    object-fit:contain;
+    display:block;
+}
+
+@media(max-width:600px){
+    #head img{
+        width:230px;
+        max-width:100%;
+        height:auto;
+        max-height:70px;
+        object-fit:contain;
+        display:block;
+    }
+}
+
+/* =========================
+   CONTROL
+========================= */
+#ctl{
+    position:absolute;
+    z-index:2000;
+    right:10px;
+    top:10px;
+    width:205px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.p{
+    background:#fff;
+    border-radius:9px;
+    box-shadow:0 2px 9px rgba(0,0,0,.25);
+    overflow:hidden;
+}
+
+.h{
+    border:0;
+    background:#fff;
+    width:100%;
+    padding:10px;
+    text-align:left;
+    font-weight:bold;
+    color:#12345a;
+    cursor:pointer;
+    font-size:14px;
+}
+
+.c{
+    display:none;
+    padding:7px;
+    border-top:1px solid #ddd;
+}
+
+.p.open .c{
+    display:block;
+}
+
+.r{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 1px;
+    font-size:11px;
+}
+
+.ln{
+    display:inline-block;
+    width:23px;
+    height:3px;
+}
+
+.src{background:red;}
+.rec{background:#003f9e;}
+
+.pt{
+    width:11px;
+    height:11px;
+    border-radius:50%;
+    display:inline-block;
+}
+
+.sp{background:red;}
+.tr{background:#06f;}
+
+.b{
+    width:100%;
+    padding:7px;
+    margin-bottom:4px;
+    background:#fff;
+    border:1px solid #ccc;
+    border-radius:5px;
+    text-align:left;
+    font-size:11px;
+    cursor:pointer;
+}
+
+.hazard-c{
+    max-height:55vh;
+    overflow-y:auto;
+}
+
+/* =========================
+   STATUS
+========================= */
+#status{
+    position:absolute;
+    z-index:2000;
+    left:10px;
+    bottom:10px;
+    background:#fff;
+    padding:5px 8px;
+    border-radius:7px;
+    box-shadow:0 2px 7px rgba(0,0,0,.2);
+    font-size:10px;
+    color:#555;
+}
+
+/* =========================
+   POPUP
+========================= */
+.at{
+    border-collapse:collapse;
+    font-size:12px;
+}
+.at td{
+    padding:4px;
+    border-bottom:1px solid #ddd;
+    vertical-align:top;
+}
+.at td:first-child{
+    font-weight:bold;
+    color:#555;
+    white-space:nowrap;
+}
+.leaflet-popup-content{
+    max-height:330px;
+    overflow:auto;
+}
+
+/* =========================
+   SP / TRAS LABEL
+   Ganjil = 90°
+   Genap = 0°
+========================= */
+.point-label{
+    background:#fff;
+    border:1px solid currentColor;
+    border-radius:3px;
+    padding:1px 3px;
+    font-size:9px;
+    line-height:11px;
+    font-weight:bold;
+    white-space:nowrap;
+    box-shadow:0 1px 3px #0002;
+    pointer-events:none;
+    display:inline-block;
+}
+
+.point-label.spLabel{color:red;}
+.point-label.trLabel{color:#06f;}
+
+.point-label.odd{
+    transform:rotate(90deg);
+    -webkit-transform:rotate(90deg);
+    transform-origin:top left;
+    -webkit-transform-origin:top left;
+}
+
+.point-label.even{
+    transform:none;
+    -webkit-transform:none;
+}
+
+/* =========================
+   RECEIVER LINE LABEL
+   ZOOM 1-16
+========================= */
+.receiver-label{
+    background:#fff;
+    border:1px solid #003f9e;
+    border-radius:3px;
+    color:#003f9e;
+    padding:2px 4px;
+    font-size:10px;
+    line-height:12px;
+    font-weight:bold;
+    white-space:nowrap;
+    box-shadow:0 1px 3px rgba(0,0,0,.2);
+    pointer-events:none;
+}
+
+/* =========================
+   TRAS PER 100
+   Ganjil = 90°
+   Genap = 0°
+   Putih
+   Zoom 1-16
+========================= */
+.per100-label{
+    color:#fff !important;
+    font-size:12px;
+    line-height:12px;
+    font-weight:bold;
+    white-space:nowrap;
+    background:transparent;
+    border:0;
+    padding:0;
+    margin:0;
+    box-shadow:none;
+    pointer-events:none;
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media(max-width:600px){
+    #ctl{
+        width:165px;
+        right:8px;
+        top:8px;
+    }
+
+    #head{
+        left:8px;
+        top:8px;
+        padding:6px 8px;
+        max-width:235px;
+    }
+
+    #head img{
+        width:220px;
+        max-height:75px;
+    }
+
+    .h{
+        padding:9px;
+        font-size:13px;
+    }
+
+    .r{
+        font-size:10px;
+        padding:4px 1px;
+    }
+}
+
+/* =========================
+   HAZARD ICON
+========================= */
+.hazard-icon{
+    width:30px;
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    line-height:30px;
+    background:rgba(255,255,255,.9);
+    border-radius:50%;
+    border:2px solid #333;
+    box-shadow:0 1px 4px rgba(0,0,0,.35);
+}
+
+.hazard-icon-wrapper{
+    background:transparent;
+    border:0;
+}
+
+
+.hazard-menu-icon{
+    width:22px;
+    min-width:22px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin-right:5px;
+    font-size:17px;
+    line-height:1;
+}
+
+
+/* =========================================================
+   SEISMIC TOOLS / INFO / SEARCH
+========================================================= */
+#tool-cursor{
+    position:absolute;
+    z-index:2000;
+    right:225px;
+    bottom:10px;
+    background:#fff;
+    padding:5px 8px;
+    border-radius:7px;
+    box-shadow:0 2px 7px rgba(0,0,0,.2);
+    font-size:10px;
+    color:#444;
+    pointer-events:none;
+}
+.tool-input{
+    width:100%;
+    box-sizing:border-box;
+    padding:7px;
+    margin-bottom:5px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:11px;
+}
+.tool-row{
+    display:flex;
+    gap:5px;
+}
+.tool-row .b{
+    flex:1;
+}
+.tool-note{
+    font-size:10px;
+    color:#666;
+    line-height:14px;
+    margin:3px 0 6px;
+}
+#searchResult{
+    max-height:150px;
+    overflow:auto;
+    margin-top:5px;
+}
+.search-item{
+    display:block;
+    width:100%;
+    border:0;
+    border-bottom:1px solid #eee;
+    background:#fff;
+    text-align:left;
+    padding:6px 3px;
+    font-size:10px;
+    cursor:pointer;
+}
+.search-item:hover{
+    background:#f2f6fb;
+}
+#measureInfo{
+    font-size:11px;
+    line-height:16px;
+    padding:4px 0;
+}
+.measure-active{
+    background:#fff8d8 !important;
+    border-color:#d9b800 !important;
+}
+.info-grid{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:3px 8px;
+    font-size:11px;
+}
+.info-grid b{
+    color:#555;
+}
+@media(max-width:600px){
+    #tool-cursor{
+        left:8px;
+        right:auto;
+        bottom:8px;
+        font-size:9px;
+    }
+}
+
+</style>
+
+<style>
+@media screen and (max-width: 600px){
+    #head{
+        max-width: calc(100vw - 20px) !important;
+        box-sizing: border-box !important;
+    }
+    #head img{
+        width: 160px !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: 50px !important;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div id="head">
+    <img src="logo.png?v=5" alt="HAZZARD MAP 2D LAMTURO BLOK EAST">
+</div>
+
+<div id="map"></div>
+
+<div id="ctl">
+
+    <!-- LAYERS : DEFAULT TERTUTUP -->
+    <div class="p">
+        <button class="h" onclick="op(this)">📚 LAYERS ▼</button>
+        <div class="c">
+
+            <label class="r">
+                <input id="srcOn" type="checkbox" checked onchange="toggleLine('src')">
+                <span class="ln src"></span>
+                Source Line
+            </label>
+
+            <label class="r">
+                <input id="recOn" type="checkbox" checked onchange="toggleLine('rec')">
+                <span class="ln rec"></span>
+                Receiver Line
+            </label>
+
+            <label class="r">
+                <input id="spOn" type="checkbox" checked onchange="refreshPoints()">
+                <span class="pt sp"></span>
+                East SP
+            </label>
+
+            <label class="r">
+                <input id="trOn" type="checkbox" checked onchange="refreshPoints()">
+                <span class="pt tr"></span>
+                East TRAS
+            </label>
+
+            <label class="r">
+                <input id="per100OddOn" type="checkbox" checked onchange="updatePer100Labels()">
+                <span class="pt tr"></span>
+                TRAS 100 Ganjil
+            </label>
+
+            <label class="r">
+                <input id="per100EvenOn" type="checkbox" checked onchange="updatePer100Labels()">
+                <span class="pt tr"></span>
+                TRAS 100 Genap
+            </label>
+
+        </div>
+    </div>
+
+    <!-- HAZARD : DEFAULT TERTUTUP -->
+    <div class="p">
+        <button class="h" onclick="op(this)">⚠️ HAZARD ▼</button>
+        <div class="c hazard-c">
+
+            <label class="r"><input id="hazardAlurIrigasi" type="checkbox" onchange="toggleHazard('alurIrigasi')"> <span class="hazard-menu-icon">💧</span>Alur Irigasi</label>
+            <label class="r"><input id="hazardBahayaListrik" type="checkbox" onchange="toggleHazard('bahayaListrik')"> <span class="hazard-menu-icon">⚡</span>Bahaya Listrik</label>
+            <label class="r"><input id="hazardCangkangKeong" type="checkbox" onchange="toggleHazard('cangkangKeong')"> <span class="hazard-menu-icon">🐚</span>Cangkang Keong</label>
+            <label class="r"><input id="hazardLumpurHisap" type="checkbox" onchange="toggleHazard('lumpurHisap')"> <span class="hazard-menu-icon">🟤</span>Lumpur Hisap</label>
+            <label class="r"><input id="hazardOpenArea" type="checkbox" onchange="toggleHazard('openArea')"> <span class="hazard-menu-icon">⬜</span>Open Area</label>
+            <label class="r"><input id="hazardPohonLapuk" type="checkbox" onchange="toggleHazard('pohonLapuk')"> <span class="hazard-menu-icon">🌳</span>Pohon Lapuk</label>
+            <label class="r"><input id="hazardPotensiBanjir" type="checkbox" onchange="toggleHazard('potensiBanjir')"> <span class="hazard-menu-icon">🌊</span>Potensi Banjir</label>
+            <label class="r"><input id="hazardPotensiKebakaran" type="checkbox" onchange="toggleHazard('potensiKebakaran')"> <span class="hazard-menu-icon">🔥</span>Potensi Kebakaran</label>
+            <label class="r"><input id="hazardPotensiKecelakaan" type="checkbox" onchange="toggleHazard('potensiKecelakaan')"> <span class="hazard-menu-icon">⚠️</span>Potensi Kecelakaan</label>
+            <label class="r"><input id="hazardPotensiTerjatuh" type="checkbox" onchange="toggleHazard('potensiTerjatuh')"> <span class="hazard-menu-icon">🚧</span>Potensi Terjatuh</label>
+            <label class="r"><input id="hazardSarangTawon" type="checkbox" onchange="toggleHazard('sarangTawon')"> <span class="hazard-menu-icon">🐝</span>Sarang Tawon</label>
+            <label class="r"><input id="hazardSungai" type="checkbox" onchange="toggleHazard('sungai')"> <span class="hazard-menu-icon">🌊</span>Sungai</label>
+            <label class="r"><input id="hazardTambak" type="checkbox" onchange="toggleHazard('tambak')"> <span class="hazard-menu-icon">🦐</span>Tambak</label>
+            <label class="r"><input id="hazardUlar" type="checkbox" onchange="toggleHazard('ular')"> <span class="hazard-menu-icon">🐍</span>Ular</label>
+
+        </div>
+    </div>
+
+
+    <!-- TOOLS -->
+    <div class="p">
+        <button class="h" onclick="op(this)">🔧 TOOLS ▼</button>
+        <div class="c">
+
+            <div class="tool-note">
+                Cari SP/TRAS atau LINE, lompat ke koordinat, dan ukur jarak di peta.
+            </div>
+
+            <input id="searchBox"
+                   class="tool-input"
+                   type="text"
+                   placeholder="Cari SP / TRAS / Line... "
+                   oninput="searchGIS()">
+
+            <div id="searchResult"></div>
+
+            <hr style="border:0;border-top:1px solid #ddd;margin:7px 0">
+
+            <div class="tool-note"><b>GO TO COORDINATE</b></div>
+
+            <input id="latInput"
+                   class="tool-input"
+                   type="number"
+                   step="any"
+                   placeholder="Latitude, contoh -7.123456">
+
+            <input id="lngInput"
+                   class="tool-input"
+                   type="number"
+                   step="any"
+                   placeholder="Longitude, contoh 112.123456">
+
+            <button class="b" onclick="goCoordinate()">📍 GO TO COORDINATE</button>
+
+            <hr style="border:0;border-top:1px solid #ddd;margin:7px 0">
+
+            <div class="tool-note"><b>MEASURE DISTANCE</b></div>
+            <div id="measureInfo">Klik tombol lalu klik 2 titik di peta.</div>
+
+            <div class="tool-row">
+                <button id="measureBtn" class="b" onclick="toggleMeasure()">📏 Measure</button>
+                <button class="b" onclick="clearMeasure()">✖ Clear</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PROJECT INFO -->
+    <div class="p">
+        <button class="h" onclick="op(this)">ℹ️ PROJECT INFO ▼</button>
+        <div class="c">
+            <div class="info-grid">
+                <b>Project</b><span>2D LAMTURO BLOK EAST</span>
+                <b>Type</b><span>2D Seismic</span>
+                <b>Datum</b><span>WGS 84</span>
+                <b>UTM</b><span>Zone 49S</span>
+                <b>Data</b><span>Source / Receiver / SP / TRAS</span>
+                <b>Hazard</b><span>HSE Hazard Map</span>
+            </div>
+            <div class="tool-note" style="margin-top:8px">
+                Last map update: <span id="lastUpdate"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BASEMAP : DEFAULT TERTUTUP -->
+<div class="p">
+    <button class="h" onclick="op(this)">🗺️ BASEMAP ▼</button>
+
+    <div class="c">
+
+        <button class="b" onclick="base('sat')">
+            🛰️ Satellite
+        </button>
+
+        <button class="b" onclick="base('hyb')">
+            🌍 Hybrid
+        </button>
+
+        <button class="b" onclick="base('road')">
+            🗺️ OpenStreetMap
+        </button>
+
+        <button class="b" onclick="base('street')">
+            🏙️ Esri Street
+        </button>
+
+        <button class="b" onclick="base('topo')">
+            ⛰️ Topographic
+        </button>
+
+    </div>
+</div>
+
+    <div class="p">
+        <button class="h" onclick="locate()">📍 POSISI SAYA</button>
+    </div>
+
+</div>
+
+<div id="tool-cursor">Lat: - | Lon: -</div>
+<div id="status">Memuat WebGIS...</div>
+
+<script>
+/* =========================================================
+   SETTING
+========================================================= */
+
+const GRID_DEG = 0.1;
+
+/* Titik SP/TRAS mulai aktif pada zoom 15 */
+const POINT_MIN_ZOOM = 15;
+
+/* Label SP/TRAS mulai tampil pada zoom 17 */
+const LABEL_MIN_ZOOM = 17;
+
+/* Label receiver hanya zoom 1-16 */
+const RECEIVER_LABEL_MAX_ZOOM = 16;
+
+const MAX_ZOOM = 20;
+
+let map;
+let src;
+let rec;
+
+let spL;
+let trL;
+
+let spLabels;
+let trLabels;
+
+let receiverLabels;
+
+let per100OddLabels;
+let per100EvenLabels;
+
+let hazardLayers = {};
+
+const hazardConfig = {
+
+    alurIrigasi:{
+        checkbox:'hazardAlurIrigasi',
+        file:'Alur_Irigasi.geojson',
+        emoji:'💧',
+        name:'Alur Irigasi'
+    },
+
+    bahayaListrik:{
+        checkbox:'hazardBahayaListrik',
+        file:'Bahaya_Listrik.geojson',
+        emoji:'⚡',
+        name:'Bahaya Listrik'
+    },
+
+    cangkangKeong:{
+        checkbox:'hazardCangkangKeong',
+        file:'Cangkang_Keong.geojson',
+        emoji:'🐚',
+        name:'Cangkang Keong'
+    },
+
+    lumpurHisap:{
+        checkbox:'hazardLumpurHisap',
+        file:'Lumpur_Hisap.geojson',
+        emoji:'🟤',
+        name:'Lumpur Hisap'
+    },
+
+    openArea:{
+        checkbox:'hazardOpenArea',
+        file:'Open_Area.geojson',
+        emoji:'⬜',
+        name:'Open Area'
+    },
+
+    pohonLapuk:{
+        checkbox:'hazardPohonLapuk',
+        file:'Pohon_Lapuk.geojson',
+        emoji:'🌳',
+        name:'Pohon Lapuk'
+    },
+
+    potensiBanjir:{
+        checkbox:'hazardPotensiBanjir',
+        file:'Potensi_Banjir.geojson',
+        emoji:'🌊',
+        name:'Potensi Banjir'
+    },
+
+    potensiKebakaran:{
+        checkbox:'hazardPotensiKebakaran',
+        file:'Potensi_Kebakaran.geojson',
+        emoji:'🔥',
+        name:'Potensi Kebakaran'
+    },
+
+    potensiKecelakaan:{
+        checkbox:'hazardPotensiKecelakaan',
+        file:'Potensi_Kecelakaan.geojson',
+        emoji:'⚠️',
+        name:'Potensi Kecelakaan'
+    },
+
+    potensiTerjatuh:{
+        checkbox:'hazardPotensiTerjatuh',
+        file:'Potensi_Terjatuh.geojson',
+        emoji:'🚧',
+        name:'Potensi Terjatuh'
+    },
+
+    sarangTawon:{
+        checkbox:'hazardSarangTawon',
+        file:'Sarang_Tawon.geojson',
+        emoji:'🐝',
+        name:'Sarang Tawon'
+    },
+
+    sungai:{
+        checkbox:'hazardSungai',
+        file:'Sungai.geojson',
+        emoji:'🌊',
+        name:'Sungai'
+    },
+
+    tambak:{
+        checkbox:'hazardTambak',
+        file:'Tambak.geojson',
+        emoji:'🦐',
+        name:'Tambak'
+    },
+
+    ular:{
+        checkbox:'hazardUlar',
+        file:'Ular.geojson',
+        emoji:'🐍',
+        name:'Ular'
+    }
+
+};
+
+
+let sat;
+let hyb;
+let road;
+let street;
+let topo;
+
+const cache = new Map();
+
+/* =========================================================
+   REFRESH CONTROL
+   Mencegah refresh lama menghapus label hasil refresh terbaru
+========================================================= */
+
+let refreshSerial = 0;
+
+/* =========================================================
+   SEISMIC TOOLS
+========================================================= */
+let measureMode = false;
+let measurePoints = [];
+let measureMarkers = [];
+let measureLine = null;
+
+const searchPointIndex = new Map();
+
+/* Project timestamp mengikuti waktu browser saat halaman dibuka. */
+function setLastUpdate(){
+    const el = document.getElementById('lastUpdate');
+    if(!el) return;
+    el.textContent = new Date().toLocaleString('id-ID',{
+        day:'2-digit',
+        month:'2-digit',
+        year:'numeric',
+        hour:'2-digit',
+        minute:'2-digit'
+    });
+}
+
+/* Simpan titik SP/TRAS yang sudah berhasil dimuat ke index pencarian. */
+function indexSearchPoint(feature, isSP){
+    if(!feature || !feature.geometry || feature.geometry.type !== 'Point'){
+        return;
+    }
+
+    const c = feature.geometry.coordinates || [];
+    if(c.length < 2) return;
+
+    const lng = Number(c[0]);
+    const lat = Number(c[1]);
+    if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    const p = feature.properties || {};
+    const line = String(p.Line ?? '');
+    const num = String(isSP ? (p.Sp ?? '') : (p.Tr ?? ''));
+    const type = isSP ? 'SP' : 'TRAS';
+
+    const key = `${type}|${line}|${num}|${lat}|${lng}`;
+    searchPointIndex.set(key,{
+        type,type,
+        line,
+        num,
+        lat,
+        lng,
+        feature
+    });
+}
+
+
+/* =========================================================
+   INIT MAP
+========================================================= */
+
+function init(){
+
+    map = L.map('map',{
+        zoomControl:false,
+        maxZoom:MAX_ZOOM,
+        preferCanvas:true
+    }).setView(
+        [-7.2,112.4],
+        10
+    );
+
+    /* ZOOM IN / OUT : POJOK KIRI BAWAH */
+    L.control.zoom({
+        position:'bottomleft'
+    }).addTo(map);
+
+    /* PANES */
+    map.createPane('receiverPane');
+    map.createPane('sourcePane');
+    map.createPane('pointPane');
+    map.createPane('receiverLabelPane');
+    map.createPane('labelPane');
+    map.createPane('hazardPane');
+
+    map.getPane('receiverPane').style.zIndex = 410;
+    map.getPane('sourcePane').style.zIndex = 430;
+    map.getPane('pointPane').style.zIndex = 450;
+    map.getPane('receiverLabelPane').style.zIndex = 480;
+    map.getPane('labelPane').style.zIndex = 500;
+    map.getPane('hazardPane').style.zIndex = 520;
+
+    /* SATELLITE */
+    sat = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+            maxZoom:MAX_ZOOM,
+            maxNativeZoom:19,
+            attribution:'Tiles © Esri'
+        }
+    ).addTo(map);
+
+    /* ROAD */
+    road = L.tileLayer(
+        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+            maxZoom:MAX_ZOOM,
+            attribution:'© OpenStreetMap contributors'
+        }
+    );
+
+    /* ESRI STREET */
+
+    street = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    {
+        maxZoom:MAX_ZOOM,
+        attribution:'Tiles © Esri'
+    }
+);
+
+    /* TOPOGRAPHIC */
+
+    topo = L.tileLayer(
+    'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    {
+        maxZoom:MAX_ZOOM,
+        attribution:
+            'Map data © OpenStreetMap contributors, SRTM | Map style © OpenTopoMap'
+    }
+);
+    
+    /* HYBRID */
+    hyb = L.layerGroup([
+        sat,
+        L.tileLayer(
+            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                opacity:.25,
+                maxZoom:MAX_ZOOM
+            }
+        )
+    ]);
+
+    /* SOURCE */
+    src = L.geoJSON(null,{
+        pane:'sourcePane',
+        style:{
+            color:'red',
+            weight:2.2,
+            opacity:.95
+        },
+        onEachFeature:linePopup
+    }).addTo(map);
+
+    /* RECEIVER */
+    rec = L.geoJSON(null,{
+        pane:'receiverPane',
+        style:{
+            color:'#003f9e',
+            weight:1.7,
+            opacity:.95
+        },
+        onEachFeature:linePopup
+    }).addTo(map);
+
+    /* POINT LAYERS */
+    spL = L.layerGroup();
+    trL = L.layerGroup();
+
+    spLabels = L.layerGroup();
+    trLabels = L.layerGroup();
+
+    receiverLabels = L.layerGroup();
+
+    per100OddLabels = L.layerGroup();
+    per100EvenLabels = L.layerGroup();
+
+    Object.keys(hazardConfig).forEach(function(key){
+        hazardLayers[key] = L.layerGroup();
+    });
+
+    loadLines();
+    loadPer100Labels();
+
+    map.on('moveend zoomend',function(){
+
+        clearTimeout(window._refreshTimer);
+
+        window._refreshTimer = setTimeout(function(){
+
+            refreshPoints();
+            updateReceiverLabels();
+            updatePer100Labels();
+
+        },150);
+
+    });
+
+    updateStatus();
+    setLastUpdate();
+
+    /* Koordinat kursor */
+    map.on('mousemove',updateCursor);
+
+    /* Klik untuk measurement */
+    map.on('click',function(e){
+        if(measureMode){
+            addMeasurePoint(e.latlng);
+        }
+    });
+
+    /* Pastikan status zoom ikut berubah */
+    map.on('zoomend',updateStatus);
+}
+
+/* =========================================================
+   LOAD LINE
+========================================================= */
+
+async function loadLines(){
+
+    try{
+
+        const r = await fetch(
+            'east_source_line.geojson?v=5',
+            {cache:'no-cache'}
+        );
+
+        if(!r.ok){
+            throw new Error(`HTTP ${r.status} - east_source_line.geojson`);
+        }
+
+        const data = await r.json();
+
+        src.addData(data);
+
+        console.log(
+            'Source Line loaded:',
+            data.features?.length ?? 0,
+            'features'
+        );
+
+    }catch(e){
+
+        console.warn('Source line:',e);
+
+    }
+
+    try{
+
+        const r = await fetch(
+            'east_receiver_line.geojson?v=5',
+            {cache:'no-cache'}
+        );
+
+        if(!r.ok){
+            throw new Error(`HTTP ${r.status} - east_receiver_line.geojson`);
+        }
+
+        const data = await r.json();
+
+        rec.addData(data);
+
+        updateReceiverLabels();
+
+        console.log(
+            'Receiver Line loaded:',
+            data.features?.length ?? 0,
+            'features'
+        );
+
+    }catch(e){
+
+        console.warn('Receiver line:',e);
+
+    }
+}
+
+/* =========================================================
+   LINE POPUP
+========================================================= */
+
+function linePopup(feature,layer){
+
+    const p = feature.properties || {};
+
+    let h =
+        '<b>📏 LINE</b><table class="at">';
+
+    Object.keys(p).forEach(k=>{
+
+        h +=
+            `<tr>
+                <td>${esc(k)}</td>
+                <td>${esc(String(p[k] ?? ''))}</td>
+            </tr>`;
+
+    });
+
+    h += '</table>';
+
+    layer.bindPopup(h,{
+        maxWidth:360
+    });
+}
+
+/* =========================================================
+   RECEIVER LINE NAME
+========================================================= */
+
+function getReceiverLineName(feature){
+
+    const p = feature.properties || {};
+
+    const keys = [
+        'Line','LINE','line',
+        'Line_Name','LINE_NAME','line_name',
+        'LineName','LINENAME',
+        'Name','name',
+        'Lintasan','LINTASAN','lintasan'
+    ];
+
+    for(const k of keys){
+
+        if(
+            p[k] !== undefined &&
+            p[k] !== null &&
+            String(p[k]).trim() !== ''
+        ){
+            return String(p[k]);
+        }
+
+    }
+
+    return '';
+}
+
+/* =========================================================
+   RECEIVER LABEL POSITION
+========================================================= */
+
+function receiverLabelPosition(layer){
+
+    try{
+
+        const latlngs = layer.getLatLngs();
+        const pts = [];
+
+        function collect(a){
+
+            if(!a) return;
+
+            for(const p of a){
+
+                if(
+                    p &&
+                    typeof p.lat === 'number' &&
+                    typeof p.lng === 'number'
+                ){
+
+                    pts.push(p);
+
+                }else if(Array.isArray(p)){
+
+                    collect(p);
+
+                }
+
+            }
+
+        }
+
+        collect(latlngs);
+
+        if(!pts.length){
+
+            return layer
+                .getBounds()
+                .getCenter();
+
+        }
+
+        const center = map.getCenter();
+
+        let best = pts[0];
+        let dist = Infinity;
+
+        for(const p of pts){
+
+            const dx = p.lng - center.lng;
+            const dy = p.lat - center.lat;
+            const d = dx*dx + dy*dy;
+
+            if(d < dist){
+
+                dist = d;
+                best = p;
+
+            }
+
+        }
+
+        return best;
+
+    }catch(e){
+
+        return layer
+            .getBounds()
+            .getCenter();
+
+    }
+}
+
+/* =========================================================
+   UPDATE RECEIVER LABEL
+   ZOOM 1-16 SAJA
+========================================================= */
+
+function updateReceiverLabels(){
+
+    if(!receiverLabels) return;
+
+    receiverLabels.clearLayers();
+
+    if(
+        !document.getElementById('recOn').checked
+    ){
+
+        map.removeLayer(receiverLabels);
+        return;
+
+    }
+
+    if(
+        map.getZoom() > RECEIVER_LABEL_MAX_ZOOM
+    ){
+
+        map.removeLayer(receiverLabels);
+        return;
+
+    }
+
+    rec.eachLayer(function(layer){
+
+        if(!layer.feature) return;
+
+        const name =
+            getReceiverLineName(
+                layer.feature
+            );
+
+        if(!name) return;
+
+        const pos =
+            receiverLabelPosition(layer);
+
+        const icon =
+            L.divIcon({
+                className:'',
+                html:
+                    `<div class="receiver-label">
+                        ${esc(name)}
+                    </div>`,
+                iconSize:null,
+                iconAnchor:[0,6]
+            });
+
+        L.marker(pos,{
+            pane:'receiverLabelPane',
+            icon:icon,
+            interactive:false
+        }).addTo(receiverLabels);
+
+    });
+
+    receiverLabels.addTo(map);
+}
+
+/* =========================================================
+   LOAD LABEL PER 100
+   HANYA TEKS
+========================================================= */
+
+async function loadPer100Labels(){
+
+    try{
+
+        const rOdd = await fetch(
+            'Label_per_100_line_ganjil.geojson?v=5',
+            {cache:'no-cache'}
+        );
+
+        if(rOdd.ok){
+
+            drawPer100Labels(
+                await rOdd.json(),
+                per100OddLabels
+            );
+
+        }else{
+
+            console.warn(
+                'Label ganjil tidak ditemukan:',
+                rOdd.status
+            );
+
+        }
+
+    }catch(e){
+
+        console.warn(
+            'Gagal membaca label ganjil:',
+            e
+        );
+
+    }
+
+    try{
+
+        const rEven = await fetch(
+            'Label_per_100_line_genap.geojson?v=5',
+            {cache:'no-cache'}
+        );
+
+        if(rEven.ok){
+
+            drawPer100Labels(
+                await rEven.json(),
+                per100EvenLabels
+            );
+
+        }else{
+
+            console.warn(
+                'Label genap tidak ditemukan:',
+                rEven.status
+            );
+
+        }
+
+    }catch(e){
+
+        console.warn(
+            'Gagal membaca label genap:',
+            e
+        );
+
+    }
+
+    updatePer100Labels();
+}
+
+/* =========================================================
+   DRAW LABEL PER 100
+   GANJIL 90°
+   GENAP 0°
+   PUTIH
+========================================================= */
+
+function drawPer100Labels(data,layerGroup){
+
+    layerGroup.clearLayers();
+
+    (data.features || []).forEach(f=>{
+
+        if(
+            !f.geometry ||
+            f.geometry.type !== 'Point'
+        ){
+            return;
+        }
+
+        const c = f.geometry.coordinates || [];
+
+        if(c.length < 2) return;
+
+        const lng = Number(c[0]);
+        const lat = Number(c[1]);
+
+        if(
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lng)
+        ){
+            return;
+        }
+
+        const p = f.properties || {};
+
+        const tras =
+            p.TRAS ??
+            p.Tras ??
+            p.tras ??
+            '';
+
+        if(String(tras).trim()===''){
+            return;
+        }
+
+        const isOdd =
+            layerGroup === per100OddLabels;
+
+        const rotation =
+            isOdd ? 90 : 0;
+
+        const icon =
+            L.divIcon({
+                className:'',
+                html:
+                    `<div class="per100-label"
+                        style="
+                            color:#fff;
+                            transform:rotate(${rotation}deg);
+                            -webkit-transform:rotate(${rotation}deg);
+                            transform-origin:top left;
+                            -webkit-transform-origin:top left;
+                        ">
+                        ${esc(String(tras))}
+                    </div>`,
+                iconSize:null,
+                iconAnchor:[0,0]
+            });
+
+        L.marker([lat,lng],{
+            pane:'labelPane',
+            icon:icon,
+            interactive:false,
+            keyboard:false
+        }).addTo(layerGroup);
+
+    });
+}
+
+/* =========================================================
+   UPDATE LABEL PER 100
+   ZOOM 1-16
+========================================================= */
+
+function updatePer100Labels(){
+
+    if(
+        !per100OddLabels ||
+        !per100EvenLabels
+    ){
+        return;
+    }
+
+    const z = map.getZoom();
+
+    const oddOn =
+        document.getElementById(
+            'per100OddOn'
+        )?.checked;
+
+    const evenOn =
+        document.getElementById(
+            'per100EvenOn'
+        )?.checked;
+
+    if(z >= 17){
+
+        map.removeLayer(
+            per100OddLabels
+        );
+
+        map.removeLayer(
+            per100EvenLabels
+        );
+
+        return;
+
+    }
+
+    if(oddOn){
+
+        per100OddLabels.addTo(map);
+
+    }else{
+
+        map.removeLayer(
+            per100OddLabels
+        );
+
+    }
+
+    if(evenOn){
+
+        per100EvenLabels.addTo(map);
+
+    }else{
+
+        map.removeLayer(
+            per100EvenLabels
+        );
+
+    }
+}
+
+/* =========================================================
+   TILE INDEX
+========================================================= */
+
+function tileIndex(v){
+
+    return Math.floor(
+        v / GRID_DEG
+    ) * 5;
+}
+
+/* =========================================================
+   TILE PATH
+========================================================= */
+
+function tilePath(kind,x,y){
+
+    return `tiles/${kind}/${x}/${y}/data.geojson`;
+
+}
+
+/* =========================================================
+   VISIBLE TILE
+========================================================= */
+
+function visibleTileKeys(){
+
+    const b = map.getBounds();
+
+    const x0 =
+        tileIndex(b.getWest()) - 5;
+
+    const x1 =
+        tileIndex(b.getEast()) + 5;
+
+    const y0 =
+        tileIndex(b.getSouth()) - 5;
+
+    const y1 =
+        tileIndex(b.getNorth()) + 5;
+
+    const out = [];
+
+    for(
+        let x=x0;
+        x<=x1;
+        x+=5
+    ){
+
+        for(
+            let y=y0;
+            y<=y1;
+            y+=5
+        ){
+
+            out.push([x,y]);
+
+        }
+
+    }
+
+    return out;
+}
+
+/* =========================================================
+   GET TILE
+========================================================= */
+
+async function getTile(kind,x,y){
+
+    const key =
+        `${kind}/${x}/${y}`;
+
+    if(cache.has(key)){
+        return cache.get(key);
+    }
+
+    const path =
+        tilePath(
+            kind,
+            x,
+            y
+        );
+
+    try{
+
+        const r =
+            await fetch(
+                path,
+                {cache:'force-cache'}
+            );
+
+        if(!r.ok){
+
+            console.warn(
+                'Tile tidak ditemukan:',
+                path,
+                r.status
+            );
+
+            cache.set(key,[]);
+            return [];
+
+        }
+
+        const d =
+            await r.json();
+
+        const fs =
+            d.features || [];
+
+        cache.set(key,fs);
+
+        return fs;
+
+    }catch(e){
+
+        console.warn(
+            'Gagal membaca tile:',
+            path,
+            e
+        );
+
+        cache.set(key,[]);
+        return [];
+
+    }
+}
+
+/* =========================================================
+   CLEAR POINT
+========================================================= */
+
+function clearPointLayers(){
+
+    spL.clearLayers();
+    trL.clearLayers();
+
+    spLabels.clearLayers();
+    trLabels.clearLayers();
+
+}
+
+/* =========================================================
+   REFRESH POINT
+   FIX:
+   - LABEL SP/TRAS TETAP ADA DI ZOOM 17+
+   - GANJIL 90°
+   - GENAP 0°
+   - refresh lama tidak boleh menghapus hasil terbaru
+========================================================= */
+
+async function refreshPoints(){
+
+    const serial =
+        ++refreshSerial;
+
+    updateStatus();
+
+    clearPointLayers();
+
+    if(
+        map.getZoom() <
+        POINT_MIN_ZOOM
+    ){
+
+        map.removeLayer(spL);
+        map.removeLayer(trL);
+
+        map.removeLayer(spLabels);
+        map.removeLayer(trLabels);
+
+        return;
+
+    }
+
+    const keys =
+        visibleTileKeys();
+
+    const jobs = [];
+
+    /* SP */
+    if(
+        document.getElementById('spOn').checked
+    ){
+
+        for(
+            const [x,y]
+            of keys
+        ){
+
+            jobs.push(
+                loadAndDraw(
+                    'sp_1',
+                    x,
+                    y,
+                    serial
+                )
+            );
+
+        }
+
+        for(
+            const [x,y]
+            of keys
+        ){
+
+            jobs.push(
+                loadAndDraw(
+                    'sp_2',
+                    x,
+                    y,
+                    serial
+                )
+            );
+
+        }
+
+    }
+
+    /* TRAS */
+    if(
+        document.getElementById('trOn').checked
+    ){
+
+        for(
+            const [x,y]
+            of keys
+        ){
+
+            jobs.push(
+                loadAndDraw(
+                    'tras_1',
+                    x,
+                    y,
+                    serial
+                )
+            );
+
+        }
+
+        for(
+            const [x,y]
+            of keys
+        ){
+
+            jobs.push(
+                loadAndDraw(
+                    'tras_2',
+                    x,
+                    y,
+                    serial
+                )
+            );
+
+        }
+
+    }
+
+    await Promise.all(jobs);
+
+    /* Kalau sudah ada refresh yang lebih baru,
+       refresh ini tidak boleh mengubah tampilan. */
+    if(serial !== refreshSerial){
+        return;
+    }
+
+    /* POINT */
+    if(
+        document.getElementById('spOn').checked
+    ){
+
+        spL.addTo(map);
+
+    }else{
+
+        map.removeLayer(spL);
+
+    }
+
+    if(
+        document.getElementById('trOn').checked
+    ){
+
+        trL.addTo(map);
+
+    }else{
+
+        map.removeLayer(trL);
+
+    }
+
+    /* LABEL SP / TRAS
+       MULAI ZOOM 17 */
+    if(
+        map.getZoom() >= LABEL_MIN_ZOOM
+    ){
+
+        if(
+            document.getElementById('spOn').checked
+        ){
+
+            spLabels.addTo(map);
+
+        }else{
+
+            map.removeLayer(spLabels);
+
+        }
+
+        if(
+            document.getElementById('trOn').checked
+        ){
+
+            trLabels.addTo(map);
+
+        }else{
+
+            map.removeLayer(trLabels);
+
+        }
+
+    }else{
+
+        map.removeLayer(spLabels);
+        map.removeLayer(trLabels);
+
+    }
+
+}
+
+/* =========================================================
+   LOAD + DRAW TILE
+========================================================= */
+
+async function loadAndDraw(
+    kind,
+    x,
+    y,
+    serial
+){
+
+    const features =
+        await getTile(
+            kind,
+            x,
+            y
+        );
+
+    if(!features.length){
+        return;
+    }
+
+    /* Jika refresh baru sudah dimulai,
+       hasil ini tidak dipakai. */
+    if(serial !== refreshSerial){
+        return;
+    }
+
+    const isSP =
+        kind.startsWith('sp_');
+
+    const pointLayer =
+        isSP
+            ? spL
+            : trL;
+
+    const labelLayer =
+        isSP
+            ? spLabels
+            : trLabels;
+
+    const b =
+        map.getBounds();
+
+    const showLabels =
+        map.getZoom() >=
+        LABEL_MIN_ZOOM;
+
+    for(const f of features){
+
+        if(
+            !f.geometry ||
+            f.geometry.type !== 'Point'
+        ){
+            continue;
+        }
+
+        const [
+            lng,
+            lat
+        ] =
+            f.geometry.coordinates;
+
+        if(
+            !b.contains([lat,lng])
+        ){
+            continue;
+        }
+
+        const p =
+            f.properties || {};
+
+        /* Index untuk Search SP/TRAS */
+        indexSearchPoint(f,isSP);
+
+        const color =
+            isSP
+                ? 'red'
+                : '#06f';
+
+        /* POINT */
+        const m =
+            L.circleMarker(
+                [lat,lng],
+                {
+                    pane:'pointPane',
+                    radius:
+                        isSP
+                            ? 3
+                            : 2.5,
+                    color:color,
+                    fillColor:color,
+                    fillOpacity:1,
+                    weight:.6
+                }
+            );
+
+        m.bindPopup(
+            attributePopup(
+                isSP,
+                p,
+                lat,
+                lng
+            ),
+            {
+                maxWidth:380
+            }
+        );
+
+        m.addTo(pointLayer);
+
+        /* LABEL */
+        if(showLabels){
+
+            const line =
+                String(
+                    p.Line ?? ''
+                );
+
+            const num =
+                isSP
+                    ? p.Sp
+                    : p.Tr;
+
+            const labelText =
+                isSP
+                    ? `${esc(line)} SP ${esc(String(num ?? ''))}`
+                    : `${esc(line)} TRAS ${esc(String(num ?? ''))}`;
+
+            const odd =
+                isOddLine(line);
+
+            /* GANJIL = 90°
+               GENAP = 0° */
+            const rotation =
+                odd ? 90 : 0;
+
+            const icon =
+                L.divIcon({
+                    className:'',
+                    html:
+                        `<div class="point-label ${
+                            isSP
+                                ? 'spLabel'
+                                : 'trLabel'
+                        }"
+                        style="
+                            transform:rotate(${rotation}deg);
+                            -webkit-transform:rotate(${rotation}deg);
+                            transform-origin:top left;
+                            -webkit-transform-origin:top left;
+                        ">
+                            ${labelText}
+                        </div>`,
+                    iconSize:null,
+                    iconAnchor:[0,0]
+                });
+
+            L.marker(
+                [lat,lng],
+                {
+                    pane:'labelPane',
+                    icon:icon,
+                    interactive:false,
+                    keyboard:false
+                }
+            ).addTo(labelLayer);
+
+        }
+
+    }
+}
+
+/* =========================================================
+   ATTRIBUTE POPUP
+========================================================= */
+
+function attributePopup(
+    isSP,
+    p,
+    lat,
+    lng
+){
+
+    let h =
+        `<b>${
+            isSP
+                ? '🔴 SP'
+                : '🔵 TRAS'
+        }</b><table class="at">`;
+
+    Object.keys(p).forEach(k=>{
+
+        h +=
+            `<tr>
+                <td>${esc(k)}</td>
+                <td>${esc(String(p[k] ?? ''))}</td>
+            </tr>`;
+
+    });
+
+    h +=
+        `<tr>
+            <td>Latitude</td>
+            <td>${lat.toFixed(7)}</td>
+        </tr>`;
+
+    h +=
+        `<tr>
+            <td>Longitude</td>
+            <td>${lng.toFixed(7)}</td>
+        </tr>`;
+
+    h += '</table>';
+
+    return h;
+}
+
+/* =========================================================
+   CHECK ODD LINE
+========================================================= */
+
+function isOddLine(line){
+
+    const m =
+        String(line).match(
+            /(\d+)\s*$/
+        );
+
+    if(!m){
+        return false;
+    }
+
+    return (
+        parseInt(
+            m[1],
+            10
+        ) % 2 === 1
+    );
+
+}
+
+/* =========================================================
+   TOGGLE LINE
+========================================================= */
+
+function toggleLine(k){
+
+    const l =
+        k === 'src'
+            ? src
+            : rec;
+
+    const id =
+        k === 'src'
+            ? 'srcOn'
+            : 'recOn';
+
+    if(
+        document.getElementById(id).checked
+    ){
+
+        l.addTo(map);
+
+        if(k === 'rec'){
+            updateReceiverLabels();
+        }
+
+    }else{
+
+        map.removeLayer(l);
+
+        if(k === 'rec'){
+            map.removeLayer(
+                receiverLabels
+            );
+        }
+
+    }
+}
+
+
+/* =========================================================
+   HAZARD
+========================================================= */
+
+function loadHazard(key){
+
+    const cfg =
+        hazardConfig[key];
+
+    const layer =
+        hazardLayers[key];
+
+    if(!cfg || !layer){
+        return Promise.resolve();
+    }
+
+    if(layer._loaded){
+        return Promise.resolve();
+    }
+
+    return fetch(
+        cfg.file + '?v=1',
+        {
+            cache:'no-cache'
+        }
+    )
+    .then(function(r){
+
+        if(!r.ok){
+            throw new Error(
+                'Hazard tidak ditemukan: ' +
+                cfg.file
+            );
+        }
+
+        return r.json();
+
+    })
+    .then(function(data){
+
+        const geo =
+            L.geoJSON(
+                data,
+                {
+                    pane:'hazardPane',
+
+                    style:function(){
+                        return {
+                            color:'#ff6600',
+                            weight:3,
+                            opacity:.9,
+                            fillColor:'#ffcc00',
+                            fillOpacity:.25
+                        };
+                    },
+
+                    pointToLayer:function(
+                        feature,
+                        latlng
+                    ){
+
+                        const icon =
+                            L.divIcon({
+                                className:'hazard-icon-wrapper',
+                                html:
+                                    `<div class="hazard-icon" title="${esc(cfg.name)}">${cfg.emoji}</div>`,
+                                iconSize:[34,34],
+                                iconAnchor:[17,17],
+                                popupAnchor:[0,-17]
+                            });
+
+                        return L.marker(
+                            latlng,
+                            {
+                                icon:icon,
+                                pane:'hazardPane'
+                            }
+                        );
+
+                    },
+
+                    onEachFeature:function(
+                        feature,
+                        lyr
+                    ){
+
+                        const p =
+                            feature.properties || {};
+
+                        let h =
+                            `<b>⚠️ ${esc(cfg.name)}</b><table class="at">`;
+
+                        Object.keys(p).forEach(
+                            function(k){
+
+                                h +=
+                                    `<tr>
+                                        <td>${esc(k)}</td>
+                                        <td>${esc(String(p[k] ?? ''))}</td>
+                                    </tr>`;
+
+                            }
+                        );
+
+                        h += '</table>';
+
+                        lyr.bindPopup(
+                            h,
+                            {
+                                maxWidth:380
+                            }
+                        );
+
+                    }
+                }
+            );
+
+        geo.addTo(layer);
+
+        layer._loaded = true;
+
+    })
+    .catch(function(e){
+
+        console.warn(
+            'Gagal membaca hazard:',
+            e
+        );
+
+    });
+
+}
+
+
+function toggleHazard(key){
+
+    const cfg =
+        hazardConfig[key];
+
+    const layer =
+        hazardLayers[key];
+
+    if(!cfg || !layer){
+        return;
+    }
+
+    const cb =
+        document.getElementById(
+            cfg.checkbox
+        );
+
+    if(!cb){
+        return;
+    }
+
+    if(cb.checked){
+
+        loadHazard(key).then(
+            function(){
+                layer.addTo(map);
+            }
+        );
+
+    }else{
+
+        map.removeLayer(
+            layer
+        );
+
+    }
+
+}
+
+/* =========================================================
+   BASEMAP
+========================================================= */
+
+function base(k){
+
+    [
+        sat,
+        road,
+        street,
+        topo,
+        hyb
+    ].forEach(x=>{
+
+        if(map.hasLayer(x)){
+            map.removeLayer(x);
+        }
+
+    });
+
+    ({
+        sat,
+        road,
+        street,
+        topo,
+        hyb
+    }[k]).addTo(map);
+}
+
+/* =========================================================
+   OPEN / CLOSE PANEL
+   Semua panel DEFAULT TERTUTUP
+========================================================= */
+
+
+/* =========================================================
+   SEARCH GIS
+========================================================= */
+
+function searchGIS(){
+
+    const input = document.getElementById('searchBox');
+    const box = document.getElementById('searchResult');
+
+    if(!input || !box) return;
+
+    const q = input.value.trim().toLowerCase();
+    box.innerHTML = '';
+
+    if(!q){
+        return;
+    }
+
+    const results = [];
+
+    /* Search Source / Receiver line yang sudah loaded */
+    [
+        {layer:src,type:'Source Line'},
+        {layer:rec,type:'Receiver Line'}
+    ].forEach(item=>{
+
+        if(!item.layer) return;
+
+        item.layer.eachLayer(function(layer){
+
+            const f = layer.feature;
+            const p = f?.properties || {};
+
+            const text = JSON.stringify(p).toLowerCase();
+
+            if(text.includes(q)){
+
+                results.push({
+                    type:item.type,
+                    layer:layer,
+                    title:item.type,
+                    detail:Object.keys(p).map(k=>`${k}: ${p[k]}`).join(' | ')
+                });
+
+            }
+
+        });
+
+    });
+
+    /* Search SP/TRAS yang sudah termuat */
+    searchPointIndex.forEach(function(item){
+
+        const text =
+            `${item.type} ${item.line} ${item.num}`.toLowerCase();
+
+        if(text.includes(q)){
+
+            results.push({
+                type:item.type,
+                title:`${item.type} ${item.line} ${item.num}`,
+                detail:`Lat ${item.lat.toFixed(7)}, Lon ${item.lng.toFixed(7)}`,
+                lat:item.lat,
+                lng:item.lng
+            });
+
+        }
+
+    });
+
+    if(!results.length){
+
+        box.innerHTML =
+            '<div class="tool-note">Tidak ditemukan pada data yang sudah dimuat. Zoom/pan ke area titik terlebih dahulu agar SP/TRAS dimuat.</div>';
+
+        return;
+    }
+
+    results.slice(0,30).forEach(function(r){
+
+        const btn = document.createElement('button');
+        btn.className = 'search-item';
+        btn.innerHTML =
+            `<b>${esc(r.title)}</b><br><span>${esc(r.detail)}</span>`;
+
+        btn.onclick = function(){
+
+            if(r.layer){
+
+                try{
+                    const b = r.layer.getBounds
+                        ? r.layer.getBounds()
+                        : null;
+
+                    if(b && b.isValid()){
+                        map.fitBounds(b.pad(.15),{
+                            maxZoom:17
+                        });
+                    }
+
+                    r.layer.openPopup();
+
+                }catch(e){
+                    console.warn('Gagal membuka hasil line:',e);
+                }
+
+            }else if(
+                Number.isFinite(r.lat) &&
+                Number.isFinite(r.lng)
+            ){
+
+                map.setView(
+                    [r.lat,r.lng],
+                    Math.max(map.getZoom(),18)
+                );
+
+                L.popup()
+                    .setLatLng([r.lat,r.lng])
+                    .setContent(
+                        `<b>${esc(r.title)}</b><br>` +
+                        `Latitude: ${r.lat.toFixed(7)}<br>` +
+                        `Longitude: ${r.lng.toFixed(7)}`
+                    )
+                    .openOn(map);
+
+            }
+
+        };
+
+        box.appendChild(btn);
+
+    });
+}
+
+/* =========================================================
+   GO TO COORDINATE
+========================================================= */
+
+function goCoordinate(){
+
+    const lat = Number(
+        document.getElementById('latInput')?.value
+    );
+
+    const lng = Number(
+        document.getElementById('lngInput')?.value
+    );
+
+    if(
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lng) ||
+        lat < -90 || lat > 90 ||
+        lng < -180 || lng > 180
+    ){
+
+        alert(
+            'Koordinat tidak valid. Isi Latitude dan Longitude dengan angka yang benar.'
+        );
+
+        return;
+    }
+
+    map.setView(
+        [lat,lng],
+        Math.max(map.getZoom(),18)
+    );
+
+    L.popup()
+        .setLatLng([lat,lng])
+        .setContent(
+            `<b>📍 Coordinate</b><br>` +
+            `Latitude: ${lat.toFixed(7)}<br>` +
+            `Longitude: ${lng.toFixed(7)}`
+        )
+        .openOn(map);
+}
+
+/* =========================================================
+   CURSOR COORDINATE
+========================================================= */
+
+function updateCursor(e){
+
+    const el = document.getElementById('tool-cursor');
+    if(!el || !e || !e.latlng) return;
+
+    el.textContent =
+        `Lat: ${e.latlng.lat.toFixed(7)} | Lon: ${e.latlng.lng.toFixed(7)}`;
+}
+
+/* =========================================================
+   MEASURE DISTANCE
+========================================================= */
+
+function toggleMeasure(){
+
+    measureMode = !measureMode;
+
+    const btn =
+        document.getElementById('measureBtn');
+
+    if(btn){
+        btn.classList.toggle(
+            'measure-active',
+            measureMode
+        );
+    }
+
+    if(measureMode){
+
+        document.getElementById('measureInfo').textContent =
+            'Mode ukur aktif — klik 2 titik di peta.';
+
+        map.getContainer().style.cursor = 'crosshair';
+
+    }else{
+
+        document.getElementById('measureInfo').textContent =
+            'Mode ukur dimatikan.';
+
+        map.getContainer().style.cursor = '';
+
+    }
+}
+
+function addMeasurePoint(latlng){
+
+    measurePoints.push(latlng);
+
+    const marker =
+        L.circleMarker(latlng,{
+            radius:5,
+            color:'#111',
+            fillColor:'#fff',
+            fillOpacity:1,
+            weight:2,
+            interactive:false
+        }).addTo(map);
+
+    measureMarkers.push(marker);
+
+    if(measurePoints.length === 2){
+
+        const a = measurePoints[0];
+        const b = measurePoints[1];
+
+        if(measureLine){
+            map.removeLayer(measureLine);
+        }
+
+        measureLine =
+            L.polyline(
+                [a,b],
+                {
+                    color:'#111',
+                    weight:3,
+                    dashArray:'7,5',
+                    interactive:false
+                }
+            ).addTo(map);
+
+        const meters =
+            map.distance(a,b);
+
+        let text;
+
+        if(meters >= 1000){
+            text =
+                `${(meters/1000).toFixed(3)} km (${meters.toFixed(1)} m)`;
+        }else{
+            text =
+                `${meters.toFixed(1)} m`;
+        }
+
+        document.getElementById('measureInfo').innerHTML =
+            `<b>Jarak: ${text}</b><br>` +
+            `P1: ${a.lat.toFixed(6)}, ${a.lng.toFixed(6)}<br>` +
+            `P2: ${b.lat.toFixed(6)}, ${b.lng.toFixed(6)}`;
+
+        measureMode = false;
+
+        const btn =
+            document.getElementById('measureBtn');
+
+        if(btn){
+            btn.classList.remove('measure-active');
+        }
+
+        map.getContainer().style.cursor = '';
+
+    }
+}
+
+function clearMeasure(){
+
+    measurePoints = [];
+
+    measureMarkers.forEach(function(m){
+        map.removeLayer(m);
+    });
+
+    measureMarkers = [];
+
+    if(measureLine){
+        map.removeLayer(measureLine);
+        measureLine = null;
+    }
+
+    const info =
+        document.getElementById('measureInfo');
+
+    if(info){
+        info.textContent =
+            'Klik tombol lalu klik 2 titik di peta.';
+    }
+
+    measureMode = false;
+
+    const btn =
+        document.getElementById('measureBtn');
+
+    if(btn){
+        btn.classList.remove('measure-active');
+    }
+
+    map.getContainer().style.cursor = '';
+}
+
+function op(b){
+
+    b.parentElement
+        .classList
+        .toggle('open');
+
+}
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function esc(s){
+
+    return String(s)
+        .replace(
+            /[&<>"']/g,
+            m=>({
+                '&':'&amp;',
+                '<':'&lt;',
+                '>':'&gt;',
+                '"':'&quot;',
+                "'":'&#039;'
+            }[m])
+        );
+
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function updateStatus(){
+
+    const z =
+        map.getZoom();
+
+    const el =
+        document.getElementById(
+            'status'
+        );
+
+    if(z < POINT_MIN_ZOOM){
+
+        el.textContent =
+            `Zoom ${z} — zoom in untuk SP/TRAS`;
+
+    }else if(z < LABEL_MIN_ZOOM){
+
+        el.textContent =
+            `Zoom ${z} — titik aktif, label muncul mulai zoom ${LABEL_MIN_ZOOM}`;
+
+    }else{
+
+        el.textContent =
+            `Zoom ${z} — SP/TRAS aktif`;
+
+    }
+}
+
+/* =========================================================
+   POSISI SAYA
+========================================================= */
+
+function locate(){
+
+    if(!navigator.geolocation){
+
+        alert(
+            'Browser tidak mendukung GPS/lokasi.'
+        );
+
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        p=>
+            map.setView(
+                [
+                    p.coords.latitude,
+                    p.coords.longitude
+                ],
+                18
+            ),
+
+        ()=>
+            alert(
+                'Izin lokasi tidak tersedia. Silakan izinkan lokasi untuk website ini.'
+            ),
+
+        {
+            enableHighAccuracy:true,
+            timeout:10000,
+            maximumAge:0
+        }
+
+    );
+}
+
+/* =========================================================
+   START
+========================================================= */
+
+init();
+
+</script>
+</body>
+</html>
