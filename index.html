@@ -596,7 +596,6 @@ let road;
 let street;
 let topo;
 
-const cache = new Map();
 
 /* =========================================================
    REFRESH CONTROL
@@ -1221,132 +1220,96 @@ function updatePer100Labels(){
 }
 
 /* =========================================================
-   TILE INDEX
+   DIRECT GEOJSON POINT DATA
+   SP  -> east_sp.geojson
+   TRAS -> east_tras.geojson
+   Tidak lagi menggunakan folder tiles.
 ========================================================= */
 
-function tileIndex(v){
+const SP_GEOJSON = 'east_sp.geojson?v=6';
+const TRAS_GEOJSON = 'east_tras.geojson?v=6';
 
-    return Math.floor(
-        v / GRID_DEG
-    ) * 5;
+let spData = null;
+let trData = null;
+let pointsLoadPromise = null;
+
+/* Index sederhana berdasarkan grid 0.1 derajat.
+   Tetap membaca GeoJSON asli, tetapi pencarian titik di area
+   layar tidak perlu memeriksa seluruh 78 ribu titik setiap kali peta digeser. */
+const spIndex = new Map();
+const trIndex = new Map();
+
+function cellKey(lng,lat){
+    const x = Math.floor(Number(lng) / GRID_DEG);
+    const y = Math.floor(Number(lat) / GRID_DEG);
+    return `${x}/${y}`;
 }
 
-/* =========================================================
-   TILE PATH
-========================================================= */
-
-function tilePath(kind,x,y){
-
-    return `tiles/${kind}/${x}/${y}/data.geojson`;
-
+function buildPointIndex(data,index){
+    index.clear();
+    (data.features || []).forEach(f=>{
+        if(!f.geometry || f.geometry.type !== 'Point') return;
+        const c = f.geometry.coordinates || [];
+        if(c.length < 2) return;
+        const lng = Number(c[0]);
+        const lat = Number(c[1]);
+        if(!Number.isFinite(lng) || !Number.isFinite(lat)) return;
+        const key = cellKey(lng,lat);
+        if(!index.has(key)) index.set(key,[]);
+        index.get(key).push(f);
+    });
 }
 
-/* =========================================================
-   VISIBLE TILE
-========================================================= */
+async function loadPointsData(){
+    if(spData && trData) return;
+    if(pointsLoadPromise) return pointsLoadPromise;
 
-function visibleTileKeys(){
+    document.getElementById('status').textContent =
+        'Memuat data East SP dan East TRAS...';
 
+    pointsLoadPromise = Promise.all([
+        fetch(SP_GEOJSON,{cache:'no-cache'}).then(r=>{
+            if(!r.ok) throw new Error('East SP tidak ditemukan: ' + r.status);
+            return r.json();
+        }),
+        fetch(TRAS_GEOJSON,{cache:'no-cache'}).then(r=>{
+            if(!r.ok) throw new Error('East TRAS tidak ditemukan: ' + r.status);
+            return r.json();
+        })
+    ]).then(([sp,tr])=>{
+        spData = sp;
+        trData = tr;
+        buildPointIndex(spData,spIndex);
+        buildPointIndex(trData,trIndex);
+        console.log('East SP loaded:',(spData.features || []).length,'features');
+        console.log('East TRAS loaded:',(trData.features || []).length,'features');
+    }).catch(e=>{
+        console.warn('Gagal membaca East SP/TRAS:',e);
+        spData = null;
+        trData = null;
+        throw e;
+    }).finally(()=>{
+        pointsLoadPromise = null;
+    });
+
+    return pointsLoadPromise;
+}
+
+function visibleFeatures(index){
     const b = map.getBounds();
-
-    const x0 =
-        tileIndex(b.getWest()) - 5;
-
-    const x1 =
-        tileIndex(b.getEast()) + 5;
-
-    const y0 =
-        tileIndex(b.getSouth()) - 5;
-
-    const y1 =
-        tileIndex(b.getNorth()) + 5;
-
+    const x0 = Math.floor(b.getWest() / GRID_DEG) - 1;
+    const x1 = Math.floor(b.getEast() / GRID_DEG) + 1;
+    const y0 = Math.floor(b.getSouth() / GRID_DEG) - 1;
+    const y1 = Math.floor(b.getNorth() / GRID_DEG) + 1;
     const out = [];
 
-    for(
-        let x=x0;
-        x<=x1;
-        x+=5
-    ){
-
-        for(
-            let y=y0;
-            y<=y1;
-            y+=5
-        ){
-
-            out.push([x,y]);
-
+    for(let x=x0; x<=x1; x++){
+        for(let y=y0; y<=y1; y++){
+            const arr = index.get(`${x}/${y}`);
+            if(arr) out.push(...arr);
         }
-
     }
-
     return out;
-}
-
-/* =========================================================
-   GET TILE
-========================================================= */
-
-async function getTile(kind,x,y){
-
-    const key =
-        `${kind}/${x}/${y}`;
-
-    if(cache.has(key)){
-        return cache.get(key);
-    }
-
-    const path =
-        tilePath(
-            kind,
-            x,
-            y
-        );
-
-    try{
-
-        const r =
-            await fetch(
-                path,
-                {cache:'force-cache'}
-            );
-
-        if(!r.ok){
-
-            console.warn(
-                'Tile tidak ditemukan:',
-                path,
-                r.status
-            );
-
-            cache.set(key,[]);
-            return [];
-
-        }
-
-        const d =
-            await r.json();
-
-        const fs =
-            d.features || [];
-
-        cache.set(key,fs);
-
-        return fs;
-
-    }catch(e){
-
-        console.warn(
-            'Gagal membaca tile:',
-            path,
-            e
-        );
-
-        cache.set(key,[]);
-        return [];
-
-    }
 }
 
 /* =========================================================
@@ -1354,370 +1317,124 @@ async function getTile(kind,x,y){
 ========================================================= */
 
 function clearPointLayers(){
-
     spL.clearLayers();
     trL.clearLayers();
-
     spLabels.clearLayers();
     trLabels.clearLayers();
-
 }
 
 /* =========================================================
    REFRESH POINT
-   FIX:
-   - LABEL SP/TRAS TETAP ADA DI ZOOM 17+
-   - GANJIL 90°
-   - GENAP 0°
-   - refresh lama tidak boleh menghapus hasil terbaru
+   Membaca langsung east_sp.geojson dan east_tras.geojson.
 ========================================================= */
 
 async function refreshPoints(){
-
-    const serial =
-        ++refreshSerial;
-
+    const serial = ++refreshSerial;
     updateStatus();
-
     clearPointLayers();
 
-    if(
-        map.getZoom() <
-        POINT_MIN_ZOOM
-    ){
-
+    if(map.getZoom() < POINT_MIN_ZOOM){
         map.removeLayer(spL);
         map.removeLayer(trL);
-
         map.removeLayer(spLabels);
         map.removeLayer(trLabels);
-
-        return;
-
-    }
-
-    const keys =
-        visibleTileKeys();
-
-    const jobs = [];
-
-    /* SP */
-    if(
-        document.getElementById('spOn').checked
-    ){
-
-        for(
-            const [x,y]
-            of keys
-        ){
-
-            jobs.push(
-                loadAndDraw(
-                    'sp_1',
-                    x,
-                    y,
-                    serial
-                )
-            );
-
-        }
-
-        for(
-            const [x,y]
-            of keys
-        ){
-
-            jobs.push(
-                loadAndDraw(
-                    'sp_2',
-                    x,
-                    y,
-                    serial
-                )
-            );
-
-        }
-
-    }
-
-    /* TRAS */
-    if(
-        document.getElementById('trOn').checked
-    ){
-
-        for(
-            const [x,y]
-            of keys
-        ){
-
-            jobs.push(
-                loadAndDraw(
-                    'tras_1',
-                    x,
-                    y,
-                    serial
-                )
-            );
-
-        }
-
-        for(
-            const [x,y]
-            of keys
-        ){
-
-            jobs.push(
-                loadAndDraw(
-                    'tras_2',
-                    x,
-                    y,
-                    serial
-                )
-            );
-
-        }
-
-    }
-
-    await Promise.all(jobs);
-
-    /* Kalau sudah ada refresh yang lebih baru,
-       refresh ini tidak boleh mengubah tampilan. */
-    if(serial !== refreshSerial){
         return;
     }
 
-    /* POINT */
-    if(
-        document.getElementById('spOn').checked
-    ){
+    try{
+        await loadPointsData();
+    }catch(e){
+        updateStatus();
+        return;
+    }
 
+    if(serial !== refreshSerial) return;
+
+    const showSP = document.getElementById('spOn').checked;
+    const showTR = document.getElementById('trOn').checked;
+    const b = map.getBounds();
+
+    if(showSP){
+        drawVisibleFeatures(visibleFeatures(spIndex),true,serial,b);
         spL.addTo(map);
-
     }else{
-
         map.removeLayer(spL);
-
     }
 
-    if(
-        document.getElementById('trOn').checked
-    ){
-
+    if(showTR){
+        drawVisibleFeatures(visibleFeatures(trIndex),false,serial,b);
         trL.addTo(map);
-
     }else{
-
         map.removeLayer(trL);
-
     }
 
-    /* LABEL SP / TRAS
-       MULAI ZOOM 17 */
-    if(
-        map.getZoom() >= LABEL_MIN_ZOOM
-    ){
-
-        if(
-            document.getElementById('spOn').checked
-        ){
-
-            spLabels.addTo(map);
-
-        }else{
-
-            map.removeLayer(spLabels);
-
-        }
-
-        if(
-            document.getElementById('trOn').checked
-        ){
-
-            trLabels.addTo(map);
-
-        }else{
-
-            map.removeLayer(trLabels);
-
-        }
-
+    if(map.getZoom() >= LABEL_MIN_ZOOM){
+        if(showSP) spLabels.addTo(map);
+        else map.removeLayer(spLabels);
+        if(showTR) trLabels.addTo(map);
+        else map.removeLayer(trLabels);
     }else{
-
         map.removeLayer(spLabels);
         map.removeLayer(trLabels);
-
     }
 
+    updateStatus();
 }
 
 /* =========================================================
-   LOAD + DRAW TILE
+   DRAW VISIBLE GEOJSON FEATURES
 ========================================================= */
 
-async function loadAndDraw(
-    kind,
-    x,
-    y,
-    serial
-){
-
-    const features =
-        await getTile(
-            kind,
-            x,
-            y
-        );
-
-    if(!features.length){
-        return;
-    }
-
-    /* Jika refresh baru sudah dimulai,
-       hasil ini tidak dipakai. */
-    if(serial !== refreshSerial){
-        return;
-    }
-
-    const isSP =
-        kind.startsWith('sp_');
-
-    const pointLayer =
-        isSP
-            ? spL
-            : trL;
-
-    const labelLayer =
-        isSP
-            ? spLabels
-            : trLabels;
-
-    const b =
-        map.getBounds();
-
-    const showLabels =
-        map.getZoom() >=
-        LABEL_MIN_ZOOM;
+function drawVisibleFeatures(features,isSP,serial,b){
+    const pointLayer = isSP ? spL : trL;
+    const labelLayer = isSP ? spLabels : trLabels;
+    const showLabels = map.getZoom() >= LABEL_MIN_ZOOM;
 
     for(const f of features){
+        if(serial !== refreshSerial) return;
+        if(!f.geometry || f.geometry.type !== 'Point') continue;
 
-        if(
-            !f.geometry ||
-            f.geometry.type !== 'Point'
-        ){
-            continue;
-        }
+        const [lng,lat] = f.geometry.coordinates || [];
+        if(!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) continue;
+        if(!b.contains([Number(lat),Number(lng)])) continue;
 
-        const [
-            lng,
-            lat
-        ] =
-            f.geometry.coordinates;
+        const p = f.properties || {};
+        const color = isSP ? 'red' : '#06f';
 
-        if(
-            !b.contains([lat,lng])
-        ){
-            continue;
-        }
+        const m = L.circleMarker([Number(lat),Number(lng)],{
+            pane:'pointPane',
+            radius:isSP ? 3 : 2.5,
+            color:color,
+            fillColor:color,
+            fillOpacity:1,
+            weight:.6
+        });
 
-        const p =
-            f.properties || {};
-
-        const color =
-            isSP
-                ? 'red'
-                : '#06f';
-
-        /* POINT */
-        const m =
-            L.circleMarker(
-                [lat,lng],
-                {
-                    pane:'pointPane',
-                    radius:
-                        isSP
-                            ? 3
-                            : 2.5,
-                    color:color,
-                    fillColor:color,
-                    fillOpacity:1,
-                    weight:.6
-                }
-            );
-
-        m.bindPopup(
-            attributePopup(
-                isSP,
-                p,
-                lat,
-                lng
-            ),
-            {
-                maxWidth:380
-            }
-        );
-
+        m.bindPopup(attributePopup(isSP,p,Number(lat),Number(lng)),{maxWidth:380});
         m.addTo(pointLayer);
 
-        /* LABEL */
         if(showLabels){
+            const line = String(p.Line ?? '');
+            const num = isSP ? p.Sp : p.Tr;
+            const labelText = isSP
+                ? `${esc(line)} SP ${esc(String(num ?? ''))}`
+                : `${esc(line)} TRAS ${esc(String(num ?? ''))}`;
+            const rotation = isOddLine(line) ? 90 : 0;
 
-            const line =
-                String(
-                    p.Line ?? ''
-                );
+            const icon = L.divIcon({
+                className:'',
+                html:`<div class="point-label ${isSP ? 'spLabel' : 'trLabel'}" style="transform:rotate(${rotation}deg);-webkit-transform:rotate(${rotation}deg);transform-origin:top left;-webkit-transform-origin:top left;">${labelText}</div>`,
+                iconSize:null,
+                iconAnchor:[0,0]
+            });
 
-            const num =
-                isSP
-                    ? p.Sp
-                    : p.Tr;
-
-            const labelText =
-                isSP
-                    ? `${esc(line)} SP ${esc(String(num ?? ''))}`
-                    : `${esc(line)} TRAS ${esc(String(num ?? ''))}`;
-
-            const odd =
-                isOddLine(line);
-
-            /* GANJIL = 90°
-               GENAP = 0° */
-            const rotation =
-                odd ? 90 : 0;
-
-            const icon =
-                L.divIcon({
-                    className:'',
-                    html:
-                        `<div class="point-label ${
-                            isSP
-                                ? 'spLabel'
-                                : 'trLabel'
-                        }"
-                        style="
-                            transform:rotate(${rotation}deg);
-                            -webkit-transform:rotate(${rotation}deg);
-                            transform-origin:top left;
-                            -webkit-transform-origin:top left;
-                        ">
-                            ${labelText}
-                        </div>`,
-                    iconSize:null,
-                    iconAnchor:[0,0]
-                });
-
-            L.marker(
-                [lat,lng],
-                {
-                    pane:'labelPane',
-                    icon:icon,
-                    interactive:false,
-                    keyboard:false
-                }
-            ).addTo(labelLayer);
-
+            L.marker([Number(lat),Number(lng)],{
+                pane:'labelPane',
+                icon:icon,
+                interactive:false,
+                keyboard:false
+            }).addTo(labelLayer);
         }
-
     }
 }
 
