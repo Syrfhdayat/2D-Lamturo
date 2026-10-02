@@ -27,7 +27,7 @@ html,body,#map{
     left:10px;
     top:10px;
     background:#fff;
-    padding:5px 7px;
+    padding:8px 10px;
     border-radius:10px;
     box-shadow:0 2px 9px rgba(0,0,0,.25);
     display:flex;
@@ -35,10 +35,10 @@ html,body,#map{
 }
 
 #head img{
-    width:350px;
+    width:500px;
     max-width:100%;
     height:auto;
-    max-height:110px;
+    max-height:160px;
     object-fit:contain;
     display:block;
 }
@@ -319,91 +319,6 @@ html,body,#map{
     line-height:1;
 }
 
-
-/* =========================================================
-   SEISMIC TOOLS / INFO / SEARCH
-========================================================= */
-#tool-cursor{
-    position:absolute;
-    z-index:2000;
-    right:225px;
-    bottom:10px;
-    background:#fff;
-    padding:5px 8px;
-    border-radius:7px;
-    box-shadow:0 2px 7px rgba(0,0,0,.2);
-    font-size:10px;
-    color:#444;
-    pointer-events:none;
-}
-.tool-input{
-    width:100%;
-    box-sizing:border-box;
-    padding:7px;
-    margin-bottom:5px;
-    border:1px solid #ccc;
-    border-radius:5px;
-    font-size:11px;
-}
-.tool-row{
-    display:flex;
-    gap:5px;
-}
-.tool-row .b{
-    flex:1;
-}
-.tool-note{
-    font-size:10px;
-    color:#666;
-    line-height:14px;
-    margin:3px 0 6px;
-}
-#searchResult{
-    max-height:150px;
-    overflow:auto;
-    margin-top:5px;
-}
-.search-item{
-    display:block;
-    width:100%;
-    border:0;
-    border-bottom:1px solid #eee;
-    background:#fff;
-    text-align:left;
-    padding:6px 3px;
-    font-size:10px;
-    cursor:pointer;
-}
-.search-item:hover{
-    background:#f2f6fb;
-}
-#measureInfo{
-    font-size:11px;
-    line-height:16px;
-    padding:4px 0;
-}
-.measure-active{
-    background:#fff8d8 !important;
-    border-color:#d9b800 !important;
-}
-.info-grid{
-    display:grid;
-    grid-template-columns:auto 1fr;
-    gap:3px 8px;
-    font-size:11px;
-}
-.info-grid b{
-    color:#555;
-}
-@media(max-width:600px){
-    #tool-cursor{
-        left:8px;
-        right:auto;
-        bottom:8px;
-        font-size:9px;
-    }
-}
-
 </style>
 
 <style>
@@ -500,101 +415,17 @@ html,body,#map{
         </div>
     </div>
 
-
-    <!-- TOOLS -->
-    <div class="p">
-        <button class="h" onclick="op(this)">🔧 TOOLS ▼</button>
-        <div class="c">
-
-            <div class="tool-note">
-                Cari SP/TRAS atau LINE, lompat ke koordinat, dan ukur jarak di peta.
-            </div>
-
-            <input id="searchBox"
-                   class="tool-input"
-                   type="text"
-                   placeholder="Cari SP / TRAS / Line... "
-                   oninput="searchGIS()">
-
-            <div id="searchResult"></div>
-
-            <hr style="border:0;border-top:1px solid #ddd;margin:7px 0">
-
-            <div class="tool-note"><b>GO TO COORDINATE</b></div>
-
-            <input id="latInput"
-                   class="tool-input"
-                   type="number"
-                   step="any"
-                   placeholder="Latitude, contoh -7.123456">
-
-            <input id="lngInput"
-                   class="tool-input"
-                   type="number"
-                   step="any"
-                   placeholder="Longitude, contoh 112.123456">
-
-            <button class="b" onclick="goCoordinate()">📍 GO TO COORDINATE</button>
-
-            <hr style="border:0;border-top:1px solid #ddd;margin:7px 0">
-
-            <div class="tool-note"><b>MEASURE DISTANCE</b></div>
-            <div id="measureInfo">Klik tombol lalu klik 2 titik di peta.</div>
-
-            <div class="tool-row">
-                <button id="measureBtn" class="b" onclick="toggleMeasure()">📏 Measure</button>
-                <button class="b" onclick="clearMeasure()">✖ Clear</button>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- PROJECT INFO -->
-    <div class="p">
-        <button class="h" onclick="op(this)">ℹ️ PROJECT INFO ▼</button>
-        <div class="c">
-            <div class="info-grid">
-                <b>Project</b><span>2D LAMTURO BLOK EAST</span>
-                <b>Type</b><span>2D Seismic</span>
-                <b>Datum</b><span>WGS 84</span>
-                <b>UTM</b><span>Zone 49S</span>
-                <b>Data</b><span>Source / Receiver / SP / TRAS</span>
-                <b>Hazard</b><span>HSE Hazard Map</span>
-            </div>
-            <div class="tool-note" style="margin-top:8px">
-                Last map update: <span id="lastUpdate"></span>
-            </div>
-        </div>
-    </div>
-
     <!-- BASEMAP : DEFAULT TERTUTUP -->
-<div class="p">
-    <button class="h" onclick="op(this)">🗺️ BASEMAP ▼</button>
+    <div class="p">
+        <button class="h" onclick="op(this)">🗺️ BASEMAP ▼</button>
+        <div class="c">
 
-    <div class="c">
+            <button class="b" onclick="base('sat')">🛰️ Satellite</button>
+            <button class="b" onclick="base('hyb')">🌍 Hybrid</button>
+            <button class="b" onclick="base('road')">🗺️ Roadmap</button>
 
-        <button class="b" onclick="base('sat')">
-            🛰️ Satellite
-        </button>
-
-        <button class="b" onclick="base('hyb')">
-            🌍 Hybrid
-        </button>
-
-        <button class="b" onclick="base('road')">
-            🗺️ OpenStreetMap
-        </button>
-
-        <button class="b" onclick="base('street')">
-            🏙️ Esri Street
-        </button>
-
-        <button class="b" onclick="base('topo')">
-            ⛰️ Topographic
-        </button>
-
+        </div>
     </div>
-</div>
 
     <div class="p">
         <button class="h" onclick="locate()">📍 POSISI SAYA</button>
@@ -602,7 +433,6 @@ html,body,#map{
 
 </div>
 
-<div id="tool-cursor">Lat: - | Lon: -</div>
 <div id="status">Memuat WebGIS...</div>
 
 <script>
@@ -746,8 +576,6 @@ const hazardConfig = {
 let sat;
 let hyb;
 let road;
-let street;
-let topo;
 
 const cache = new Map();
 
@@ -757,59 +585,6 @@ const cache = new Map();
 ========================================================= */
 
 let refreshSerial = 0;
-
-/* =========================================================
-   SEISMIC TOOLS
-========================================================= */
-let measureMode = false;
-let measurePoints = [];
-let measureMarkers = [];
-let measureLine = null;
-
-const searchPointIndex = new Map();
-
-/* Project timestamp mengikuti waktu browser saat halaman dibuka. */
-function setLastUpdate(){
-    const el = document.getElementById('lastUpdate');
-    if(!el) return;
-    el.textContent = new Date().toLocaleString('id-ID',{
-        day:'2-digit',
-        month:'2-digit',
-        year:'numeric',
-        hour:'2-digit',
-        minute:'2-digit'
-    });
-}
-
-/* Simpan titik SP/TRAS yang sudah berhasil dimuat ke index pencarian. */
-function indexSearchPoint(feature, isSP){
-    if(!feature || !feature.geometry || feature.geometry.type !== 'Point'){
-        return;
-    }
-
-    const c = feature.geometry.coordinates || [];
-    if(c.length < 2) return;
-
-    const lng = Number(c[0]);
-    const lat = Number(c[1]);
-    if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-
-    const p = feature.properties || {};
-    const line = String(p.Line ?? '');
-    const num = String(isSP ? (p.Sp ?? '') : (p.Tr ?? ''));
-    const type = isSP ? 'SP' : 'TRAS';
-
-    const key = `${type}|${line}|${num}|${lat}|${lng}`;
-    searchPointIndex.set(key,{
-        type,type,
-        line,
-        num,
-        lat,
-        lng,
-        feature
-    });
-}
-
 
 /* =========================================================
    INIT MAP
@@ -858,39 +633,18 @@ function init(){
 
     /* ROAD */
     road = L.tileLayer(
-        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         {
             maxZoom:MAX_ZOOM,
             attribution:'© OpenStreetMap contributors'
         }
     );
 
-    /* ESRI STREET */
-
-    street = L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-    {
-        maxZoom:MAX_ZOOM,
-        attribution:'Tiles © Esri'
-    }
-);
-
-    /* TOPOGRAPHIC */
-
-    topo = L.tileLayer(
-    'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    {
-        maxZoom:MAX_ZOOM,
-        attribution:
-            'Map data © OpenStreetMap contributors, SRTM | Map style © OpenTopoMap'
-    }
-);
-    
     /* HYBRID */
     hyb = L.layerGroup([
         sat,
         L.tileLayer(
-            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             {
                 opacity:.25,
                 maxZoom:MAX_ZOOM
@@ -954,20 +708,6 @@ function init(){
     });
 
     updateStatus();
-    setLastUpdate();
-
-    /* Koordinat kursor */
-    map.on('mousemove',updateCursor);
-
-    /* Klik untuk measurement */
-    map.on('click',function(e){
-        if(measureMode){
-            addMeasurePoint(e.latlng);
-        }
-    });
-
-    /* Pastikan status zoom ikut berubah */
-    map.on('zoomend',updateStatus);
 }
 
 /* =========================================================
@@ -983,19 +723,13 @@ async function loadLines(){
             {cache:'no-cache'}
         );
 
-        if(!r.ok){
-            throw new Error(`HTTP ${r.status} - east_source_line.geojson`);
+        if(r.ok){
+
+            src.addData(
+                await r.json()
+            );
+
         }
-
-        const data = await r.json();
-
-        src.addData(data);
-
-        console.log(
-            'Source Line loaded:',
-            data.features?.length ?? 0,
-            'features'
-        );
 
     }catch(e){
 
@@ -1010,21 +744,15 @@ async function loadLines(){
             {cache:'no-cache'}
         );
 
-        if(!r.ok){
-            throw new Error(`HTTP ${r.status} - east_receiver_line.geojson`);
+        if(r.ok){
+
+            rec.addData(
+                await r.json()
+            );
+
+            updateReceiverLabels();
+
         }
-
-        const data = await r.json();
-
-        rec.addData(data);
-
-        updateReceiverLabels();
-
-        console.log(
-            'Receiver Line loaded:',
-            data.features?.length ?? 0,
-            'features'
-        );
 
     }catch(e){
 
@@ -1855,9 +1583,6 @@ async function loadAndDraw(
         const p =
             f.properties || {};
 
-        /* Index untuk Search SP/TRAS */
-        indexSearchPoint(f,isSP);
-
         const color =
             isSP
                 ? 'red'
@@ -2247,8 +1972,6 @@ function base(k){
     [
         sat,
         road,
-        street,
-        topo,
         hyb
     ].forEach(x=>{
 
@@ -2261,8 +1984,6 @@ function base(k){
     ({
         sat,
         road,
-        street,
-        topo,
         hyb
     }[k]).addTo(map);
 }
@@ -2271,335 +1992,6 @@ function base(k){
    OPEN / CLOSE PANEL
    Semua panel DEFAULT TERTUTUP
 ========================================================= */
-
-
-/* =========================================================
-   SEARCH GIS
-========================================================= */
-
-function searchGIS(){
-
-    const input = document.getElementById('searchBox');
-    const box = document.getElementById('searchResult');
-
-    if(!input || !box) return;
-
-    const q = input.value.trim().toLowerCase();
-    box.innerHTML = '';
-
-    if(!q){
-        return;
-    }
-
-    const results = [];
-
-    /* Search Source / Receiver line yang sudah loaded */
-    [
-        {layer:src,type:'Source Line'},
-        {layer:rec,type:'Receiver Line'}
-    ].forEach(item=>{
-
-        if(!item.layer) return;
-
-        item.layer.eachLayer(function(layer){
-
-            const f = layer.feature;
-            const p = f?.properties || {};
-
-            const text = JSON.stringify(p).toLowerCase();
-
-            if(text.includes(q)){
-
-                results.push({
-                    type:item.type,
-                    layer:layer,
-                    title:item.type,
-                    detail:Object.keys(p).map(k=>`${k}: ${p[k]}`).join(' | ')
-                });
-
-            }
-
-        });
-
-    });
-
-    /* Search SP/TRAS yang sudah termuat */
-    searchPointIndex.forEach(function(item){
-
-        const text =
-            `${item.type} ${item.line} ${item.num}`.toLowerCase();
-
-        if(text.includes(q)){
-
-            results.push({
-                type:item.type,
-                title:`${item.type} ${item.line} ${item.num}`,
-                detail:`Lat ${item.lat.toFixed(7)}, Lon ${item.lng.toFixed(7)}`,
-                lat:item.lat,
-                lng:item.lng
-            });
-
-        }
-
-    });
-
-    if(!results.length){
-
-        box.innerHTML =
-            '<div class="tool-note">Tidak ditemukan pada data yang sudah dimuat. Zoom/pan ke area titik terlebih dahulu agar SP/TRAS dimuat.</div>';
-
-        return;
-    }
-
-    results.slice(0,30).forEach(function(r){
-
-        const btn = document.createElement('button');
-        btn.className = 'search-item';
-        btn.innerHTML =
-            `<b>${esc(r.title)}</b><br><span>${esc(r.detail)}</span>`;
-
-        btn.onclick = function(){
-
-            if(r.layer){
-
-                try{
-                    const b = r.layer.getBounds
-                        ? r.layer.getBounds()
-                        : null;
-
-                    if(b && b.isValid()){
-                        map.fitBounds(b.pad(.15),{
-                            maxZoom:17
-                        });
-                    }
-
-                    r.layer.openPopup();
-
-                }catch(e){
-                    console.warn('Gagal membuka hasil line:',e);
-                }
-
-            }else if(
-                Number.isFinite(r.lat) &&
-                Number.isFinite(r.lng)
-            ){
-
-                map.setView(
-                    [r.lat,r.lng],
-                    Math.max(map.getZoom(),18)
-                );
-
-                L.popup()
-                    .setLatLng([r.lat,r.lng])
-                    .setContent(
-                        `<b>${esc(r.title)}</b><br>` +
-                        `Latitude: ${r.lat.toFixed(7)}<br>` +
-                        `Longitude: ${r.lng.toFixed(7)}`
-                    )
-                    .openOn(map);
-
-            }
-
-        };
-
-        box.appendChild(btn);
-
-    });
-}
-
-/* =========================================================
-   GO TO COORDINATE
-========================================================= */
-
-function goCoordinate(){
-
-    const lat = Number(
-        document.getElementById('latInput')?.value
-    );
-
-    const lng = Number(
-        document.getElementById('lngInput')?.value
-    );
-
-    if(
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lng) ||
-        lat < -90 || lat > 90 ||
-        lng < -180 || lng > 180
-    ){
-
-        alert(
-            'Koordinat tidak valid. Isi Latitude dan Longitude dengan angka yang benar.'
-        );
-
-        return;
-    }
-
-    map.setView(
-        [lat,lng],
-        Math.max(map.getZoom(),18)
-    );
-
-    L.popup()
-        .setLatLng([lat,lng])
-        .setContent(
-            `<b>📍 Coordinate</b><br>` +
-            `Latitude: ${lat.toFixed(7)}<br>` +
-            `Longitude: ${lng.toFixed(7)}`
-        )
-        .openOn(map);
-}
-
-/* =========================================================
-   CURSOR COORDINATE
-========================================================= */
-
-function updateCursor(e){
-
-    const el = document.getElementById('tool-cursor');
-    if(!el || !e || !e.latlng) return;
-
-    el.textContent =
-        `Lat: ${e.latlng.lat.toFixed(7)} | Lon: ${e.latlng.lng.toFixed(7)}`;
-}
-
-/* =========================================================
-   MEASURE DISTANCE
-========================================================= */
-
-function toggleMeasure(){
-
-    measureMode = !measureMode;
-
-    const btn =
-        document.getElementById('measureBtn');
-
-    if(btn){
-        btn.classList.toggle(
-            'measure-active',
-            measureMode
-        );
-    }
-
-    if(measureMode){
-
-        document.getElementById('measureInfo').textContent =
-            'Mode ukur aktif — klik 2 titik di peta.';
-
-        map.getContainer().style.cursor = 'crosshair';
-
-    }else{
-
-        document.getElementById('measureInfo').textContent =
-            'Mode ukur dimatikan.';
-
-        map.getContainer().style.cursor = '';
-
-    }
-}
-
-function addMeasurePoint(latlng){
-
-    measurePoints.push(latlng);
-
-    const marker =
-        L.circleMarker(latlng,{
-            radius:5,
-            color:'#111',
-            fillColor:'#fff',
-            fillOpacity:1,
-            weight:2,
-            interactive:false
-        }).addTo(map);
-
-    measureMarkers.push(marker);
-
-    if(measurePoints.length === 2){
-
-        const a = measurePoints[0];
-        const b = measurePoints[1];
-
-        if(measureLine){
-            map.removeLayer(measureLine);
-        }
-
-        measureLine =
-            L.polyline(
-                [a,b],
-                {
-                    color:'#111',
-                    weight:3,
-                    dashArray:'7,5',
-                    interactive:false
-                }
-            ).addTo(map);
-
-        const meters =
-            map.distance(a,b);
-
-        let text;
-
-        if(meters >= 1000){
-            text =
-                `${(meters/1000).toFixed(3)} km (${meters.toFixed(1)} m)`;
-        }else{
-            text =
-                `${meters.toFixed(1)} m`;
-        }
-
-        document.getElementById('measureInfo').innerHTML =
-            `<b>Jarak: ${text}</b><br>` +
-            `P1: ${a.lat.toFixed(6)}, ${a.lng.toFixed(6)}<br>` +
-            `P2: ${b.lat.toFixed(6)}, ${b.lng.toFixed(6)}`;
-
-        measureMode = false;
-
-        const btn =
-            document.getElementById('measureBtn');
-
-        if(btn){
-            btn.classList.remove('measure-active');
-        }
-
-        map.getContainer().style.cursor = '';
-
-    }
-}
-
-function clearMeasure(){
-
-    measurePoints = [];
-
-    measureMarkers.forEach(function(m){
-        map.removeLayer(m);
-    });
-
-    measureMarkers = [];
-
-    if(measureLine){
-        map.removeLayer(measureLine);
-        measureLine = null;
-    }
-
-    const info =
-        document.getElementById('measureInfo');
-
-    if(info){
-        info.textContent =
-            'Klik tombol lalu klik 2 titik di peta.';
-    }
-
-    measureMode = false;
-
-    const btn =
-        document.getElementById('measureBtn');
-
-    if(btn){
-        btn.classList.remove('measure-active');
-    }
-
-    map.getContainer().style.cursor = '';
-}
 
 function op(b){
 
