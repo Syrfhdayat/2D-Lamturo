@@ -468,7 +468,7 @@ const LABEL_MIN_ZOOM = 17;
 /* Label receiver hanya zoom 1-16 */
 const RECEIVER_LABEL_MAX_ZOOM = 16;
 
-const MAX_ZOOM = 20;
+const MAX_ZOOM = 22;
 
 let map;
 let src;
@@ -644,7 +644,7 @@ function init(){
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         {
             maxZoom:MAX_ZOOM,
-            maxNativeZoom:19,
+            maxNativeZoom:18,
             attribution:'Tiles © Esri'
         }
     ).addTo(map);
