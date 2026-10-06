@@ -397,20 +397,11 @@ html,body,#map{
         <button class="h" onclick="op(this)">⚠️ HAZARD ▼</button>
         <div class="c hazard-c">
 
-            <label class="r"><input id="hazardAlurIrigasi" type="checkbox" onchange="toggleHazard('alurIrigasi')"> <span class="hazard-menu-icon">💧</span>Alur Irigasi</label>
-            <label class="r"><input id="hazardBahayaListrik" type="checkbox" onchange="toggleHazard('bahayaListrik')"> <span class="hazard-menu-icon">⚡</span>Bahaya Listrik</label>
-            <label class="r"><input id="hazardCangkangKeong" type="checkbox" onchange="toggleHazard('cangkangKeong')"> <span class="hazard-menu-icon">🐚</span>Cangkang Keong</label>
-            <label class="r"><input id="hazardLumpurHisap" type="checkbox" onchange="toggleHazard('lumpurHisap')"> <span class="hazard-menu-icon">🟤</span>Lumpur Hisap</label>
-            <label class="r"><input id="hazardOpenArea" type="checkbox" onchange="toggleHazard('openArea')"> <span class="hazard-menu-icon">⬜</span>Open Area</label>
+            <label class="r"><input id="hazardSungaiRawa" type="checkbox" onchange="toggleHazard('sungaiRawa')"> <span class="hazard-menu-icon">🌊</span>Sungai atau Rawa</label>
+            <label class="r"><input id="hazardPotensiBanjir" type="checkbox" onchange="toggleHazard('potensiBanjir')"> <span class="hazard-menu-icon">🌧️</span>Potensi Banjir</label>
             <label class="r"><input id="hazardPohonLapuk" type="checkbox" onchange="toggleHazard('pohonLapuk')"> <span class="hazard-menu-icon">🌳</span>Pohon Lapuk</label>
-            <label class="r"><input id="hazardPotensiBanjir" type="checkbox" onchange="toggleHazard('potensiBanjir')"> <span class="hazard-menu-icon">🌊</span>Potensi Banjir</label>
-            <label class="r"><input id="hazardPotensiKebakaran" type="checkbox" onchange="toggleHazard('potensiKebakaran')"> <span class="hazard-menu-icon">🔥</span>Potensi Kebakaran</label>
-            <label class="r"><input id="hazardPotensiKecelakaan" type="checkbox" onchange="toggleHazard('potensiKecelakaan')"> <span class="hazard-menu-icon">⚠️</span>Potensi Kecelakaan</label>
-            <label class="r"><input id="hazardPotensiTerjatuh" type="checkbox" onchange="toggleHazard('potensiTerjatuh')"> <span class="hazard-menu-icon">🚧</span>Potensi Terjatuh</label>
-            <label class="r"><input id="hazardSarangTawon" type="checkbox" onchange="toggleHazard('sarangTawon')"> <span class="hazard-menu-icon">🐝</span>Sarang Tawon</label>
-            <label class="r"><input id="hazardSungai" type="checkbox" onchange="toggleHazard('sungai')"> <span class="hazard-menu-icon">🌊</span>Sungai</label>
-            <label class="r"><input id="hazardTambak" type="checkbox" onchange="toggleHazard('tambak')"> <span class="hazard-menu-icon">🦐</span>Tambak</label>
-            <label class="r"><input id="hazardUlar" type="checkbox" onchange="toggleHazard('ular')"> <span class="hazard-menu-icon">🐍</span>Ular</label>
+            <label class="r"><input id="hazardLainnya" type="checkbox" onchange="toggleHazard('lainnya')"> <span class="hazard-menu-icon">⚠️</span>Lainnya</label>
+            <label class="r"><input id="hazardBinatangBerbahaya" type="checkbox" onchange="toggleHazard('binatangBerbahaya')"> <span class="hazard-menu-icon">🐍</span>Binatang Berbahaya</label>
 
         </div>
     </div>
@@ -489,102 +480,39 @@ let hazardLayers = {};
 
 const hazardConfig = {
 
-    alurIrigasi:{
-        checkbox:'hazardAlurIrigasi',
-        file:'Alur_Irigasi.geojson',
-        emoji:'💧',
-        name:'Alur Irigasi'
-    },
-
-    bahayaListrik:{
-        checkbox:'hazardBahayaListrik',
-        file:'Bahaya_Listrik.geojson',
-        emoji:'⚡',
-        name:'Bahaya Listrik'
-    },
-
-    cangkangKeong:{
-        checkbox:'hazardCangkangKeong',
-        file:'Cangkang_Keong.geojson',
-        emoji:'🐚',
-        name:'Cangkang Keong'
-    },
-
-    lumpurHisap:{
-        checkbox:'hazardLumpurHisap',
-        file:'Lumpur_Hisap.geojson',
-        emoji:'🟤',
-        name:'Lumpur Hisap'
-    },
-
-    openArea:{
-        checkbox:'hazardOpenArea',
-        file:'Open_Area.geojson',
-        emoji:'⬜',
-        name:'Open Area'
-    },
-
-    pohonLapuk:{
-        checkbox:'hazardPohonLapuk',
-        file:'Pohon_Lapuk.geojson',
-        emoji:'🌳',
-        name:'Pohon Lapuk'
+    sungaiRawa:{
+        checkbox:'hazardSungaiRawa',
+        file:'Sungai atau Rawa.geojson',
+        emoji:'🌊',
+        name:'Sungai atau Rawa'
     },
 
     potensiBanjir:{
         checkbox:'hazardPotensiBanjir',
-        file:'Potensi_Banjir.geojson',
-        emoji:'🌊',
+        file:'Potensi Banjir.geojson',
+        emoji:'🌧️',
         name:'Potensi Banjir'
     },
 
-    potensiKebakaran:{
-        checkbox:'hazardPotensiKebakaran',
-        file:'Potensi_Kebakaran.geojson',
-        emoji:'🔥',
-        name:'Potensi Kebakaran'
+    pohonLapuk:{
+        checkbox:'hazardPohonLapuk',
+        file:'Pohon Lapuk.geojson',
+        emoji:'🌳',
+        name:'Pohon Lapuk'
     },
 
-    potensiKecelakaan:{
-        checkbox:'hazardPotensiKecelakaan',
-        file:'Potensi_Kecelakaan.geojson',
+    lainnya:{
+        checkbox:'hazardLainnya',
+        file:'Lainnya.geojson',
         emoji:'⚠️',
-        name:'Potensi Kecelakaan'
+        name:'Lainnya'
     },
 
-    potensiTerjatuh:{
-        checkbox:'hazardPotensiTerjatuh',
-        file:'Potensi_Terjatuh.geojson',
-        emoji:'🚧',
-        name:'Potensi Terjatuh'
-    },
-
-    sarangTawon:{
-        checkbox:'hazardSarangTawon',
-        file:'Sarang_Tawon.geojson',
-        emoji:'🐝',
-        name:'Sarang Tawon'
-    },
-
-    sungai:{
-        checkbox:'hazardSungai',
-        file:'Sungai.geojson',
-        emoji:'🌊',
-        name:'Sungai'
-    },
-
-    tambak:{
-        checkbox:'hazardTambak',
-        file:'Tambak.geojson',
-        emoji:'🦐',
-        name:'Tambak'
-    },
-
-    ular:{
-        checkbox:'hazardUlar',
-        file:'Ular.geojson',
+    binatangBerbahaya:{
+        checkbox:'hazardBinatangBerbahaya',
+        file:'Binatang Berbahaya.geojson',
         emoji:'🐍',
-        name:'Ular'
+        name:'Binatang Berbahaya'
     }
 
 };
