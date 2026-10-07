@@ -307,7 +307,6 @@ html,body,#map{
     border:0;
 }
 
-
 .hazard-menu-icon{
     width:22px;
     min-width:22px;
@@ -407,36 +406,36 @@ html,body,#map{
     </div>
 
     <!-- BASEMAP : DEFAULT TERTUTUP -->
-<div class="p">
-    <button class="h" onclick="op(this)">🗺️ BASEMAP ▼</button>
+    <div class="p">
+        <button class="h" onclick="op(this)">🗺️ BASEMAP ▼</button>
 
-    <div class="c">
+        <div class="c">
 
-        <button class="b" onclick="base('sat')">
-            🛰️ Satellite
-        </button>
+            <button class="b" onclick="base('sat')">
+                🛰️ Satellite
+            </button>
 
-        <button class="b" onclick="base('hyb')">
-            🌍 Hybrid
-        </button>
+            <button class="b" onclick="base('hyb')">
+                🌍 Hybrid
+            </button>
 
-        <button class="b" onclick="base('road')">
-            🗺️ OpenStreetMap
-        </button>
+            <button class="b" onclick="base('road')">
+                🗺️ OpenStreetMap
+            </button>
 
-        <button class="b" onclick="base('street')">
-            🏙️ Esri Street
-        </button>
+            <button class="b" onclick="base('street')">
+                🏙️ Esri Street
+            </button>
 
-        <button class="b" onclick="base('topo')">
-            ⛰️ Topographic
-        </button>
+            <button class="b" onclick="base('topo')">
+                ⛰️ Topographic
+            </button>
 
+        </div>
     </div>
-</div>
 
     <div class="p">
-        <button class="h" onclick="locate()">📍 POSISI SAYA</button>
+        <button class="h" onclick="locate()">📍 My Location</button>
     </div>
 
 </div>
@@ -478,6 +477,9 @@ let per100EvenLabels;
 
 let hazardLayers = {};
 
+let myLocationMarker = null;
+let myLocationCircle = null;
+
 const hazardConfig = {
 
     sungaiRawa:{
@@ -517,18 +519,11 @@ const hazardConfig = {
 
 };
 
-
 let sat;
 let hyb;
 let road;
 let street;
 let topo;
-
-
-/* =========================================================
-   REFRESH CONTROL
-   Mencegah refresh lama menghapus label hasil refresh terbaru
-========================================================= */
 
 let refreshSerial = 0;
 
@@ -587,25 +582,22 @@ function init(){
     );
 
     /* ESRI STREET */
-
     street = L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-    {
-        maxZoom:MAX_ZOOM,
-        attribution:'Tiles © Esri'
-    }
-);
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        {
+            maxZoom:MAX_ZOOM,
+            attribution:'Tiles © Esri'
+        }
+    );
 
     /* TOPOGRAPHIC */
-
     topo = L.tileLayer(
-    'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    {
-        maxZoom:MAX_ZOOM,
-        attribution:
-            'Map data © OpenStreetMap contributors, SRTM | Map style © OpenTopoMap'
-    }
-);
+        'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+        {
+            maxZoom:MAX_ZOOM,
+            attribution:'Map data © OpenStreetMap contributors, SRTM | Map style © OpenTopoMap'
+        }
+    );
     
     /* HYBRID */
     hyb = L.layerGroup([
@@ -661,17 +653,12 @@ function init(){
     loadPer100Labels();
 
     map.on('moveend zoomend',function(){
-
         clearTimeout(window._refreshTimer);
-
         window._refreshTimer = setTimeout(function(){
-
             refreshPoints();
             updateReceiverLabels();
             updatePer100Labels();
-
         },150);
-
     });
 
     updateStatus();
@@ -682,49 +669,21 @@ function init(){
 ========================================================= */
 
 async function loadLines(){
-
     try{
-
-        const r = await fetch(
-            'east_source_line.geojson?v=5',
-            {cache:'no-cache'}
-        );
-
-        if(r.ok){
-
-            src.addData(
-                await r.json()
-            );
-
-        }
-
+        const r = await fetch('east_source_line.geojson?v=5',{cache:'no-cache'});
+        if(r.ok) src.addData(await r.json());
     }catch(e){
-
         console.warn('Source line:',e);
-
     }
 
     try{
-
-        const r = await fetch(
-            'east_receiver_line.geojson?v=5',
-            {cache:'no-cache'}
-        );
-
+        const r = await fetch('east_receiver_line.geojson?v=5',{cache:'no-cache'});
         if(r.ok){
-
-            rec.addData(
-                await r.json()
-            );
-
+            rec.addData(await r.json());
             updateReceiverLabels();
-
         }
-
     }catch(e){
-
         console.warn('Receiver line:',e);
-
     }
 }
 
@@ -733,344 +692,144 @@ async function loadLines(){
 ========================================================= */
 
 function linePopup(feature,layer){
-
     const p = feature.properties || {};
-
-    let h =
-        '<b>📏 LINE</b><table class="at">';
-
+    let h = '<b>📏 LINE</b><table class="at">';
     Object.keys(p).forEach(k=>{
-
-        h +=
-            `<tr>
-                <td>${esc(k)}</td>
-                <td>${esc(String(p[k] ?? ''))}</td>
-            </tr>`;
-
+        h += `<tr><td>${esc(k)}</td><td>${esc(String(p[k] ?? ''))}</td></tr>`;
     });
-
     h += '</table>';
-
-    layer.bindPopup(h,{
-        maxWidth:360
-    });
+    layer.bindPopup(h,{maxWidth:360});
 }
 
-/* =========================================================
-   RECEIVER LINE NAME
-========================================================= */
-
 function getReceiverLineName(feature){
-
     const p = feature.properties || {};
-
-    const keys = [
-        'Line','LINE','line',
-        'Line_Name','LINE_NAME','line_name',
-        'LineName','LINENAME',
-        'Name','name',
-        'Lintasan','LINTASAN','lintasan'
-    ];
-
+    const keys = ['Line','LINE','line','Line_Name','LINE_NAME','line_name','LineName','LINENAME','Name','name','Lintasan','LINTASAN','lintasan'];
     for(const k of keys){
-
-        if(
-            p[k] !== undefined &&
-            p[k] !== null &&
-            String(p[k]).trim() !== ''
-        ){
+        if(p[k] !== undefined && p[k] !== null && String(p[k]).trim() !== ''){
             return String(p[k]);
         }
-
     }
-
     return '';
 }
 
-/* =========================================================
-   RECEIVER LABEL POSITION
-========================================================= */
-
 function receiverLabelPosition(layer){
-
     try{
-
         const latlngs = layer.getLatLngs();
         const pts = [];
 
         function collect(a){
-
             if(!a) return;
-
             for(const p of a){
-
-                if(
-                    p &&
-                    typeof p.lat === 'number' &&
-                    typeof p.lng === 'number'
-                ){
-
+                if(p && typeof p.lat === 'number' && typeof p.lng === 'number'){
                     pts.push(p);
-
                 }else if(Array.isArray(p)){
-
                     collect(p);
-
                 }
-
             }
-
         }
-
         collect(latlngs);
 
-        if(!pts.length){
-
-            return layer
-                .getBounds()
-                .getCenter();
-
-        }
+        if(!pts.length) return layer.getBounds().getCenter();
 
         const center = map.getCenter();
-
         let best = pts[0];
         let dist = Infinity;
 
         for(const p of pts){
-
             const dx = p.lng - center.lng;
             const dy = p.lat - center.lat;
             const d = dx*dx + dy*dy;
-
             if(d < dist){
-
                 dist = d;
                 best = p;
-
             }
-
         }
-
         return best;
-
     }catch(e){
-
-        return layer
-            .getBounds()
-            .getCenter();
-
+        return layer.getBounds().getCenter();
     }
 }
 
-/* =========================================================
-   UPDATE RECEIVER LABEL
-   ZOOM 1-16 SAJA
-========================================================= */
-
 function updateReceiverLabels(){
-
     if(!receiverLabels) return;
-
     receiverLabels.clearLayers();
 
-    if(
-        !document.getElementById('recOn').checked
-    ){
-
+    if(!document.getElementById('recOn').checked){
         map.removeLayer(receiverLabels);
         return;
-
     }
 
-    if(
-        map.getZoom() > RECEIVER_LABEL_MAX_ZOOM
-    ){
-
+    if(map.getZoom() > RECEIVER_LABEL_MAX_ZOOM){
         map.removeLayer(receiverLabels);
         return;
-
     }
 
     rec.eachLayer(function(layer){
-
         if(!layer.feature) return;
-
-        const name =
-            getReceiverLineName(
-                layer.feature
-            );
-
+        const name = getReceiverLineName(layer.feature);
         if(!name) return;
+        const pos = receiverLabelPosition(layer);
 
-        const pos =
-            receiverLabelPosition(layer);
-
-        const icon =
-            L.divIcon({
-                className:'',
-                html:
-                    `<div class="receiver-label">
-                        ${esc(name)}
-                    </div>`,
-                iconSize:null,
-                iconAnchor:[0,6]
-            });
+        const icon = L.divIcon({
+            className:'',
+            html:`<div class="receiver-label">${esc(name)}</div>`,
+            iconSize:null,
+            iconAnchor:[0,6]
+        });
 
         L.marker(pos,{
             pane:'receiverLabelPane',
             icon:icon,
             interactive:false
         }).addTo(receiverLabels);
-
     });
 
     receiverLabels.addTo(map);
 }
 
-/* =========================================================
-   LOAD LABEL PER 100
-   HANYA TEKS
-========================================================= */
-
 async function loadPer100Labels(){
-
     try{
-
-        const rOdd = await fetch(
-            'Label_per_100_line_ganjil.geojson?v=5',
-            {cache:'no-cache'}
-        );
-
-        if(rOdd.ok){
-
-            drawPer100Labels(
-                await rOdd.json(),
-                per100OddLabels
-            );
-
-        }else{
-
-            console.warn(
-                'Label ganjil tidak ditemukan:',
-                rOdd.status
-            );
-
-        }
-
+        const rOdd = await fetch('Label_per_100_line_ganjil.geojson?v=5',{cache:'no-cache'});
+        if(rOdd.ok) drawPer100Labels(await rOdd.json(), per100OddLabels);
     }catch(e){
-
-        console.warn(
-            'Gagal membaca label ganjil:',
-            e
-        );
-
+        console.warn('Gagal membaca label ganjil:',e);
     }
 
     try{
-
-        const rEven = await fetch(
-            'Label_per_100_line_genap.geojson?v=5',
-            {cache:'no-cache'}
-        );
-
-        if(rEven.ok){
-
-            drawPer100Labels(
-                await rEven.json(),
-                per100EvenLabels
-            );
-
-        }else{
-
-            console.warn(
-                'Label genap tidak ditemukan:',
-                rEven.status
-            );
-
-        }
-
+        const rEven = await fetch('Label_per_100_line_genap.geojson?v=5',{cache:'no-cache'});
+        if(rEven.ok) drawPer100Labels(await rEven.json(), per100EvenLabels);
     }catch(e){
-
-        console.warn(
-            'Gagal membaca label genap:',
-            e
-        );
-
+        console.warn('Gagal membaca label genap:',e);
     }
 
     updatePer100Labels();
 }
 
-/* =========================================================
-   DRAW LABEL PER 100
-   GANJIL 90°
-   GENAP 0°
-   PUTIH
-========================================================= */
-
 function drawPer100Labels(data,layerGroup){
-
     layerGroup.clearLayers();
 
     (data.features || []).forEach(f=>{
-
-        if(
-            !f.geometry ||
-            f.geometry.type !== 'Point'
-        ){
-            return;
-        }
-
+        if(!f.geometry || f.geometry.type !== 'Point') return;
         const c = f.geometry.coordinates || [];
-
         if(c.length < 2) return;
 
         const lng = Number(c[0]);
         const lat = Number(c[1]);
-
-        if(
-            !Number.isFinite(lat) ||
-            !Number.isFinite(lng)
-        ){
-            return;
-        }
+        if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
         const p = f.properties || {};
+        const tras = p.TRAS ?? p.Tras ?? p.tras ?? '';
+        if(String(tras).trim()==='') return;
 
-        const tras =
-            p.TRAS ??
-            p.Tras ??
-            p.tras ??
-            '';
+        const isOdd = layerGroup === per100OddLabels;
+        const rotation = isOdd ? 90 : 0;
 
-        if(String(tras).trim()===''){
-            return;
-        }
-
-        const isOdd =
-            layerGroup === per100OddLabels;
-
-        const rotation =
-            isOdd ? 90 : 0;
-
-        const icon =
-            L.divIcon({
-                className:'',
-                html:
-                    `<div class="per100-label"
-                        style="
-                            color:#fff;
-                            transform:rotate(${rotation}deg);
-                            -webkit-transform:rotate(${rotation}deg);
-                            transform-origin:top left;
-                            -webkit-transform-origin:top left;
-                        ">
-                        ${esc(String(tras))}
-                    </div>`,
-                iconSize:null,
-                iconAnchor:[0,0]
-            });
+        const icon = L.divIcon({
+            className:'',
+            html:`<div class="per100-label" style="color:#fff; transform:rotate(${rotation}deg); -webkit-transform:rotate(${rotation}deg); transform-origin:top left; -webkit-transform-origin:top left;">${esc(String(tras))}</div>`,
+            iconSize:null,
+            iconAnchor:[0,0]
+        });
 
         L.marker([lat,lng],{
             pane:'labelPane',
@@ -1078,81 +837,28 @@ function drawPer100Labels(data,layerGroup){
             interactive:false,
             keyboard:false
         }).addTo(layerGroup);
-
     });
 }
 
-/* =========================================================
-   UPDATE LABEL PER 100
-   ZOOM 1-16
-========================================================= */
-
 function updatePer100Labels(){
-
-    if(
-        !per100OddLabels ||
-        !per100EvenLabels
-    ){
-        return;
-    }
+    if(!per100OddLabels || !per100EvenLabels) return;
 
     const z = map.getZoom();
-
-    const oddOn =
-        document.getElementById(
-            'per100OddOn'
-        )?.checked;
-
-    const evenOn =
-        document.getElementById(
-            'per100EvenOn'
-        )?.checked;
+    const oddOn = document.getElementById('per100OddOn')?.checked;
+    const evenOn = document.getElementById('per100EvenOn')?.checked;
 
     if(z >= 17){
-
-        map.removeLayer(
-            per100OddLabels
-        );
-
-        map.removeLayer(
-            per100EvenLabels
-        );
-
+        map.removeLayer(per100OddLabels);
+        map.removeLayer(per100EvenLabels);
         return;
-
     }
 
-    if(oddOn){
+    if(oddOn) per100OddLabels.addTo(map);
+    else map.removeLayer(per100OddLabels);
 
-        per100OddLabels.addTo(map);
-
-    }else{
-
-        map.removeLayer(
-            per100OddLabels
-        );
-
-    }
-
-    if(evenOn){
-
-        per100EvenLabels.addTo(map);
-
-    }else{
-
-        map.removeLayer(
-            per100EvenLabels
-        );
-
-    }
+    if(evenOn) per100EvenLabels.addTo(map);
+    else map.removeLayer(per100EvenLabels);
 }
-
-/* =========================================================
-   DIRECT GEOJSON POINT DATA
-   SP  -> east_sp.geojson
-   TRAS -> east_tras.geojson
-   Tidak lagi menggunakan folder tiles.
-========================================================= */
 
 const SP_GEOJSON = 'east_sp.geojson?v=6';
 const TRAS_GEOJSON = 'east_tras.geojson?v=6';
@@ -1161,9 +867,6 @@ let spData = null;
 let trData = null;
 let pointsLoadPromise = null;
 
-/* Index sederhana berdasarkan grid 0.1 derajat.
-   Tetap membaca GeoJSON asli, tetapi pencarian titik di area
-   layar tidak perlu memeriksa seluruh 78 ribu titik setiap kali peta digeser. */
 const spIndex = new Map();
 const trIndex = new Map();
 
@@ -1192,8 +895,7 @@ async function loadPointsData(){
     if(spData && trData) return;
     if(pointsLoadPromise) return pointsLoadPromise;
 
-    document.getElementById('status').textContent =
-        'Memuat data East SP dan East TRAS...';
+    document.getElementById('status').textContent = 'Memuat data East SP dan East TRAS...';
 
     pointsLoadPromise = Promise.all([
         fetch(SP_GEOJSON,{cache:'no-cache'}).then(r=>{
@@ -1209,8 +911,6 @@ async function loadPointsData(){
         trData = tr;
         buildPointIndex(spData,spIndex);
         buildPointIndex(trData,trIndex);
-        console.log('East SP loaded:',(spData.features || []).length,'features');
-        console.log('East TRAS loaded:',(trData.features || []).length,'features');
     }).catch(e=>{
         console.warn('Gagal membaca East SP/TRAS:',e);
         spData = null;
@@ -1240,21 +940,12 @@ function visibleFeatures(index){
     return out;
 }
 
-/* =========================================================
-   CLEAR POINT
-========================================================= */
-
 function clearPointLayers(){
     spL.clearLayers();
     trL.clearLayers();
     spLabels.clearLayers();
     trLabels.clearLayers();
 }
-
-/* =========================================================
-   REFRESH POINT
-   Membaca langsung east_sp.geojson dan east_tras.geojson.
-========================================================= */
 
 async function refreshPoints(){
     const serial = ++refreshSerial;
@@ -1344,8 +1035,15 @@ function drawVisibleFeatures(features,isSP,serial,b){
         if(showLabels){
             const line = String(p.Line ?? '');
             const num = isSP ? p.Sp : p.Tr;
+            
+            // Format SP menjadi 1 desimal di belakang koma
+            let formattedNum = num;
+            if (isSP && num !== null && num !== undefined && !isNaN(Number(num))) {
+                formattedNum = Number(num).toFixed(1);
+            }
+
             const labelText = isSP
-                ? `${esc(line)} SP ${esc(String(num ?? ''))}`
+                ? `${esc(line)} SP ${esc(String(formattedNum ?? ''))}`
                 : `${esc(line)} TRAS ${esc(String(num ?? ''))}`;
             const rotation = isOddLine(line) ? 90 : 0;
 
@@ -1366,419 +1064,172 @@ function drawVisibleFeatures(features,isSP,serial,b){
     }
 }
 
-/* =========================================================
-   ATTRIBUTE POPUP
-========================================================= */
-
-function attributePopup(
-    isSP,
-    p,
-    lat,
-    lng
-){
-
-    let h =
-        `<b>${
-            isSP
-                ? '🔴 SP'
-                : '🔵 TRAS'
-        }</b><table class="at">`;
-
+function attributePopup(isSP,p,lat,lng){
+    let h = `<b>${isSP ? '🔴 SP' : '🔵 TRAS'}</b><table class="at">`;
     Object.keys(p).forEach(k=>{
-
-        h +=
-            `<tr>
-                <td>${esc(k)}</td>
-                <td>${esc(String(p[k] ?? ''))}</td>
-            </tr>`;
-
+        h += `<tr><td>${esc(k)}</td><td>${esc(String(p[k] ?? ''))}</td></tr>`;
     });
-
-    h +=
-        `<tr>
-            <td>Latitude</td>
-            <td>${lat.toFixed(7)}</td>
-        </tr>`;
-
-    h +=
-        `<tr>
-            <td>Longitude</td>
-            <td>${lng.toFixed(7)}</td>
-        </tr>`;
-
+    h += `<tr><td>Latitude</td><td>${lat.toFixed(7)}</td></tr>`;
+    h += `<tr><td>Longitude</td><td>${lng.toFixed(7)}</td></tr>`;
     h += '</table>';
-
     return h;
 }
 
-/* =========================================================
-   CHECK ODD LINE
-========================================================= */
-
 function isOddLine(line){
-
-    const m =
-        String(line).match(
-            /(\d+)\s*$/
-        );
-
-    if(!m){
-        return false;
-    }
-
-    return (
-        parseInt(
-            m[1],
-            10
-        ) % 2 === 1
-    );
-
+    const m = String(line).match(/(\d+)\s*$/);
+    if(!m) return false;
+    return (parseInt(m[1],10) % 2 === 1);
 }
-
-/* =========================================================
-   TOGGLE LINE
-========================================================= */
 
 function toggleLine(k){
+    const l = k === 'src' ? src : rec;
+    const id = k === 'src' ? 'srcOn' : 'recOn';
 
-    const l =
-        k === 'src'
-            ? src
-            : rec;
-
-    const id =
-        k === 'src'
-            ? 'srcOn'
-            : 'recOn';
-
-    if(
-        document.getElementById(id).checked
-    ){
-
+    if(document.getElementById(id).checked){
         l.addTo(map);
-
-        if(k === 'rec'){
-            updateReceiverLabels();
-        }
-
+        if(k === 'rec') updateReceiverLabels();
     }else{
-
         map.removeLayer(l);
-
-        if(k === 'rec'){
-            map.removeLayer(
-                receiverLabels
-            );
-        }
-
+        if(k === 'rec') map.removeLayer(receiverLabels);
     }
 }
-
-
-/* =========================================================
-   HAZARD
-========================================================= */
 
 function loadHazard(key){
+    const cfg = hazardConfig[key];
+    const layer = hazardLayers[key];
+    if(!cfg || !layer) return Promise.resolve();
+    if(layer._loaded) return Promise.resolve();
 
-    const cfg =
-        hazardConfig[key];
-
-    const layer =
-        hazardLayers[key];
-
-    if(!cfg || !layer){
-        return Promise.resolve();
-    }
-
-    if(layer._loaded){
-        return Promise.resolve();
-    }
-
-    return fetch(
-        cfg.file + '?v=1',
-        {
-            cache:'no-cache'
-        }
-    )
-    .then(function(r){
-
-        if(!r.ok){
-            throw new Error(
-                'Hazard tidak ditemukan: ' +
-                cfg.file
-            );
-        }
-
+    return fetch(cfg.file + '?v=1',{cache:'no-cache'})
+    .then(r => {
+        if(!r.ok) throw new Error('Hazard tidak ditemukan: ' + cfg.file);
         return r.json();
-
     })
-    .then(function(data){
-
-        const geo =
-            L.geoJSON(
-                data,
-                {
-                    pane:'hazardPane',
-
-                    style:function(){
-                        return {
-                            color:'#ff6600',
-                            weight:3,
-                            opacity:.9,
-                            fillColor:'#ffcc00',
-                            fillOpacity:.25
-                        };
-                    },
-
-                    pointToLayer:function(
-                        feature,
-                        latlng
-                    ){
-
-                        const icon =
-                            L.divIcon({
-                                className:'hazard-icon-wrapper',
-                                html:
-                                    `<div class="hazard-icon" title="${esc(cfg.name)}">${cfg.emoji}</div>`,
-                                iconSize:[34,34],
-                                iconAnchor:[17,17],
-                                popupAnchor:[0,-17]
-                            });
-
-                        return L.marker(
-                            latlng,
-                            {
-                                icon:icon,
-                                pane:'hazardPane'
-                            }
-                        );
-
-                    },
-
-                    onEachFeature:function(
-                        feature,
-                        lyr
-                    ){
-
-                        const p =
-                            feature.properties || {};
-
-                        let h =
-                            `<b>⚠️ ${esc(cfg.name)}</b><table class="at">`;
-
-                        Object.keys(p).forEach(
-                            function(k){
-
-                                h +=
-                                    `<tr>
-                                        <td>${esc(k)}</td>
-                                        <td>${esc(String(p[k] ?? ''))}</td>
-                                    </tr>`;
-
-                            }
-                        );
-
-                        h += '</table>';
-
-                        lyr.bindPopup(
-                            h,
-                            {
-                                maxWidth:380
-                            }
-                        );
-
-                    }
-                }
-            );
-
+    .then(data => {
+        const geo = L.geoJSON(data,{
+            pane:'hazardPane',
+            style:function(){
+                return {
+                    color:'#ff6600',
+                    weight:3,
+                    opacity:.9,
+                    fillColor:'#ffcc00',
+                    fillOpacity:.25
+                };
+            },
+            pointToLayer:function(feature,latlng){
+                const icon = L.divIcon({
+                    className:'hazard-icon-wrapper',
+                    html:`<div class="hazard-icon" title="${esc(cfg.name)}">${cfg.emoji}</div>`,
+                    iconSize:[34,34],
+                    iconAnchor:[17,17],
+                    popupAnchor:[0,-17]
+                });
+                return L.marker(latlng,{icon:icon,pane:'hazardPane'});
+            },
+            onEachFeature:function(feature,lyr){
+                const p = feature.properties || {};
+                let h = `<b>⚠️ ${esc(cfg.name)}</b><table class="at">`;
+                Object.keys(p).forEach(k=>{
+                    h += `<tr><td>${esc(k)}</td><td>${esc(String(p[k] ?? ''))}</td></tr>`;
+                });
+                h += '</table>';
+                lyr.bindPopup(h,{maxWidth:380});
+            }
+        });
         geo.addTo(layer);
-
         layer._loaded = true;
-
     })
-    .catch(function(e){
-
-        console.warn(
-            'Gagal membaca hazard:',
-            e
-        );
-
-    });
-
+    .catch(e => console.warn('Gagal membaca hazard:',e));
 }
-
 
 function toggleHazard(key){
+    const cfg = hazardConfig[key];
+    const layer = hazardLayers[key];
+    if(!cfg || !layer) return;
 
-    const cfg =
-        hazardConfig[key];
-
-    const layer =
-        hazardLayers[key];
-
-    if(!cfg || !layer){
-        return;
-    }
-
-    const cb =
-        document.getElementById(
-            cfg.checkbox
-        );
-
-    if(!cb){
-        return;
-    }
+    const cb = document.getElementById(cfg.checkbox);
+    if(!cb) return;
 
     if(cb.checked){
-
-        loadHazard(key).then(
-            function(){
-                layer.addTo(map);
-            }
-        );
-
+        loadHazard(key).then(() => layer.addTo(map));
     }else{
-
-        map.removeLayer(
-            layer
-        );
-
+        map.removeLayer(layer);
     }
-
 }
-
-/* =========================================================
-   BASEMAP
-========================================================= */
 
 function base(k){
-
-    [
-        sat,
-        road,
-        street,
-        topo,
-        hyb
-    ].forEach(x=>{
-
-        if(map.hasLayer(x)){
-            map.removeLayer(x);
-        }
-
+    [sat,road,street,topo,hyb].forEach(x=>{
+        if(map.hasLayer(x)) map.removeLayer(x);
     });
-
-    ({
-        sat,
-        road,
-        street,
-        topo,
-        hyb
-    }[k]).addTo(map);
+    ({sat,road,street,topo,hyb}[k]).addTo(map);
 }
-
-/* =========================================================
-   OPEN / CLOSE PANEL
-   Semua panel DEFAULT TERTUTUP
-========================================================= */
 
 function op(b){
-
-    b.parentElement
-        .classList
-        .toggle('open');
-
+    b.parentElement.classList.toggle('open');
 }
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
 
 function esc(s){
-
-    return String(s)
-        .replace(
-            /[&<>"']/g,
-            m=>({
-                '&':'&amp;',
-                '<':'&lt;',
-                '>':'&gt;',
-                '"':'&quot;',
-                "'":'&#039;'
-            }[m])
-        );
-
+    return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
-/* =========================================================
-   STATUS
-========================================================= */
-
 function updateStatus(){
-
-    const z =
-        map.getZoom();
-
-    const el =
-        document.getElementById(
-            'status'
-        );
+    const z = map.getZoom();
+    const el = document.getElementById('status');
 
     if(z < POINT_MIN_ZOOM){
-
-        el.textContent =
-            `Zoom ${z} — zoom in untuk SP/TRAS`;
-
+        el.textContent = `Zoom ${z} — zoom in untuk SP/TRAS`;
     }else if(z < LABEL_MIN_ZOOM){
-
-        el.textContent =
-            `Zoom ${z} — titik aktif, label muncul mulai zoom ${LABEL_MIN_ZOOM}`;
-
+        el.textContent = `Zoom ${z} — titik aktif, label muncul mulai zoom ${LABEL_MIN_ZOOM}`;
     }else{
-
-        el.textContent =
-            `Zoom ${z} — SP/TRAS aktif`;
-
+        el.textContent = `Zoom ${z} — SP/TRAS aktif`;
     }
 }
 
 /* =========================================================
-   POSISI SAYA
+   MY LOCATION (GPS LOCATE)
 ========================================================= */
 
 function locate(){
-
     if(!navigator.geolocation){
-
-        alert(
-            'Browser tidak mendukung GPS/lokasi.'
-        );
-
+        alert('Browser tidak mendukung GPS/lokasi.');
         return;
     }
 
     navigator.geolocation.getCurrentPosition(
+        p => {
+            const lat = p.coords.latitude;
+            const lng = p.coords.longitude;
+            const accuracy = p.coords.accuracy;
 
-        p=>
-            map.setView(
-                [
-                    p.coords.latitude,
-                    p.coords.longitude
-                ],
-                18
-            ),
+            // Hapus penanda posisi sebelumnya jika sudah ada
+            if(myLocationMarker) map.removeLayer(myLocationMarker);
+            if(myLocationCircle) map.removeLayer(myLocationCircle);
 
-        ()=>
-            alert(
-                'Izin lokasi tidak tersedia. Silakan izinkan lokasi untuk website ini.'
-            ),
+            // Buat lingkaran akurasi GPS
+            myLocationCircle = L.circle([lat, lng], {
+                radius: accuracy,
+                color: '#1e88e5',
+                fillColor: '#1e88e5',
+                fillOpacity: 0.15,
+                weight: 1
+            }).addTo(map);
 
+            // Buat marker pin lokasi saya
+            myLocationMarker = L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup(`<b>📍 My Location</b><br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}`)
+                .openPopup();
+
+            // Arahkan kamera peta ke lokasi pengguna
+            map.setView([lat, lng], 18);
+        },
+        () => alert('Izin lokasi tidak tersedia. Silakan izinkan akses lokasi pada browser Anda.'),
         {
-            enableHighAccuracy:true,
-            timeout:10000,
-            maximumAge:0
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
         }
-
     );
 }
 
