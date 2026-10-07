@@ -3,24 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Peta Spasial - Central & West Lines</title>
+  <title>Peta WebGIS</title>
   
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
     html, body, #map {
       width: 100%;
       height: 100%;
-    }
-    .legend-title {
-      font-weight: bold;
-      margin-bottom: 5px;
+      margin: 0;
+      padding: 0;
     }
   </style>
 </head>
@@ -28,118 +20,63 @@
 
   <div id="map"></div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // 1. Inisialisasi Peta
+    // Inisialisasi Peta
     const map = L.map('map').setView([0, 0], 2);
 
-    // Basemap: OpenStreetMap
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Basemap: Esri World Imagery (Satelit)
-    const esriSatelit = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri'
-    });
-
-    // 2. Definisi Style berdasarkan jenis layer
-    const styleConfig = {
-      receiverLine: { color: '#e74c3c', weight: 2, dashArray: '4, 4' }, // Merah putus-putus
-      sourceLine:   { color: '#2ecc71', weight: 2 },                     // Hijau solid
-      tras:         { color: '#9b59b6', weight: 3 },                     // Ungu solid
-      spMarker: {
-        radius: 4,
-        fillColor: '#3498db',
-        color: '#ffffff',
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      }
-    };
-
-    // Helper untuk memuat GeoJSON dan mengembalikan Layer Group
-    async function fetchGeoJSON(filePath, styleType) {
-      const layerGroup = L.layerGroup();
-      try {
-        const response = await fetch(filePath);
-        if (!response.ok) throw new Error(`Gagal memuat ${filePath}`);
-        const data = await response.json();
-
-        const geoJsonLayer = L.geoJSON(data, {
-          style: function () {
-            return styleConfig[styleType] || {};
-          },
-          pointToLayer: function (feature, latlng) {
-            if (styleType === 'spMarker') {
-              return L.circleMarker(latlng, styleConfig.spMarker);
-            }
-            return L.marker(latlng);
-          },
-          onEachFeature: function (feature, layer) {
-            // Popup otomatis menampilkan semua properti/atribut
-            if (feature.properties) {
-              let popupContent = '<table style="font-size:12px;">';
-              for (const [key, value] of Object.entries(feature.properties)) {
-                popupContent += `<tr><b>${key}:</b> ${value}</tr><br>`;
+    // Fungsi fetch GeoJSON
+    function loadGeoJSON(filePath, style) {
+      return fetch(filePath)
+        .then(res => res.json())
+        .then(data => {
+          return L.geoJSON(data, {
+            style: style,
+            onEachFeature: function (feature, layer) {
+              if (feature.properties) {
+                layer.bindPopup(JSON.stringify(feature.properties));
               }
-              popupContent += '</table>';
-              layer.bindPopup(popupContent);
             }
-          }
-        });
-
-        layerGroup.addLayer(geoJsonLayer);
-      } catch (error) {
-        console.error(error);
-      }
-      return layerGroup;
+          });
+        })
+        .catch(err => console.error('Error loading ' + filePath, err));
     }
 
-    // 3. Load semua data GeoJSON Central & West
-    async function loadAllLayers() {
-      // Daftar file sesuai dengan struktur repository
-      const layers = {
-        // Central Area
-        'Central Receiver Line': await fetchGeoJSON('./central_receiver_line.geojson', 'receiverLine'),[cite: 26]
-        'Central Source Line':   await fetchGeoJSON('./central_source_line.geojson', 'sourceLine'),[cite: 26]
-        'Central SP':            await fetchGeoJSON('./central_sp.geojson', 'spMarker'),[cite: 26]
-        'Central Tras':          await fetchGeoJSON('./central_tras.geojson', 'tras'),[cite: 26]
+    // Daftar 8 file GeoJSON
+    const files = [
+      'central_receiver_line.geojson',
+      'central_source_line.geojson',
+      'central_sp.geojson',
+      'central_tras.geojson',
+      'west_receiver_line.geojson',
+      'west_source_line.geojson',
+      'west_sp.geojson',
+      'west_tras.geojson'
+    ];
+
+    const overlayMaps = {};
+    let loadedCount = 0;
+
+    // Loop untuk memuat dan nampilin semua file
+    files.forEach(fileName => {
+      loadGeoJSON('./' + fileName).then(layer => {
+        if (layer) {
+          layer.addTo(map);
+          overlayMaps[fileName] = layer;
+        }
         
-        // West Area[cite: 26]
-        'West Receiver Line':    await fetchGeoJSON('./west_receiver_line.geojson', 'receiverLine'),[cite: 26]
-        'West Source Line':      await fetchGeoJSON('./west_source_line.geojson', 'sourceLine'),[cite: 26]
-        'West SP':               await fetchGeoJSON('./west_sp.geojson', 'spMarker'),[cite: 18, 26]
-        'West Tras':             await fetchGeoJSON('./west_tras.geojson', 'tras')[cite: 26]
-      };
-
-      // Tampilkan layer awal ke peta
-      const allBounds = L.latLngBounds();
-      for (const [name, layer] of Object.entries(layers)) {
-        layer.addTo(map);
-        layer.eachLayer(l => {
-          if (l.getBounds) allBounds.extend(l.getBounds());
-        });
-      }
-
-      // Atur zoom peta agar mencakup seluruh data
-      if (allBounds.isValid()) {
-        map.fitBounds(allBounds);
-      }
-
-      // 4. Tambahkan Layer Control di Pojok Kanan Atas
-      const baseMaps = {
-        "OpenStreetMap": osm,
-        "Satelit (Esri)": esriSatelit
-      };
-
-      L.control.layers(baseMaps, layers, { collapsed: false }).addTo(map);
-    }
-
-    loadAllLayers();
+        loadedCount++;
+        if (loadedCount === files.length) {
+          L.control.layers(null, overlayMaps).addTo(map);
+        }
+      });
+    });
   </script>
 </body>
 </html>
