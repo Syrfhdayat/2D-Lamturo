@@ -142,12 +142,12 @@ html,body,#map{
 }
 
 /* =========================
-   STATUS
+   STATUS & KOORDINAT (KANAN BAWAH)
 ========================= */
 #status{
     position:absolute;
     z-index:2000;
-    left:10px;
+    right:10px;
     bottom:10px;
     background:#fff;
     padding:5px 8px;
@@ -155,6 +155,16 @@ html,body,#map{
     box-shadow:0 2px 7px rgba(0,0,0,.2);
     font-size:10px;
     color:#555;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    text-align:right;
+}
+
+#coords{
+    font-weight:bold;
+    color:#12345a;
+    font-family:monospace;
 }
 
 /* =========================
@@ -181,8 +191,6 @@ html,body,#map{
 
 /* =========================
    SP / TRAS LABEL
-   Ganjil = 90°
-   Genap = 0°
 ========================= */
 .point-label{
     background:#fff;
@@ -201,21 +209,8 @@ html,body,#map{
 .point-label.spLabel{color:red;}
 .point-label.trLabel{color:#06f;}
 
-.point-label.odd{
-    transform:rotate(90deg);
-    -webkit-transform:rotate(90deg);
-    transform-origin:top left;
-    -webkit-transform-origin:top left;
-}
-
-.point-label.even{
-    transform:none;
-    -webkit-transform:none;
-}
-
 /* =========================
    RECEIVER LINE LABEL
-   ZOOM 1-16
 ========================= */
 .receiver-label{
     background:#fff;
@@ -233,10 +228,6 @@ html,body,#map{
 
 /* =========================
    TRAS PER 100
-   Ganjil = 90°
-   Genap = 0°
-   Putih
-   Zoom 1-16
 ========================= */
 .per100-label{
     color:#fff !important;
@@ -250,6 +241,16 @@ html,body,#map{
     margin:0;
     box-shadow:none;
     pointer-events:none;
+}
+
+/* =========================
+   RED LOCATION ICON
+========================= */
+.red-location-icon {
+    font-size: 26px;
+    text-align: center;
+    line-height: 26px;
+    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
 }
 
 /* =========================
@@ -340,7 +341,7 @@ html,body,#map{
 <body>
 
 <div id="head">
-    <img src="logo.png?v=5" alt="HAZZARD MAP 2D LAMTURO BLOK EAST">
+    <img src="logo_2d_lamturo_project_centered.png?v=1" alt="HAZZARD MAP 2D LAMTURO PROJECT">
 </div>
 
 <div id="map"></div>
@@ -440,7 +441,10 @@ html,body,#map{
 
 </div>
 
-<div id="status">Memuat WebGIS...</div>
+<div id="status">
+    <div id="statusText">Memuat WebGIS...</div>
+    <div id="coords">Lat: - | Lng: -</div>
+</div>
 
 <script>
 /* =========================================================
@@ -448,16 +452,9 @@ html,body,#map{
 ========================================================= */
 
 const GRID_DEG = 0.1;
-
-/* Titik SP/TRAS mulai aktif pada zoom 15 */
 const POINT_MIN_ZOOM = 15;
-
-/* Label SP/TRAS mulai tampil pada zoom 17 */
 const LABEL_MIN_ZOOM = 17;
-
-/* Label receiver hanya zoom 1-16 */
 const RECEIVER_LABEL_MAX_ZOOM = 16;
-
 const MAX_ZOOM = 22;
 
 let map;
@@ -478,45 +475,13 @@ let per100EvenLabels;
 let hazardLayers = {};
 
 let myLocationMarker = null;
-let myLocationCircle = null;
 
 const hazardConfig = {
-
-    sungaiRawa:{
-        checkbox:'hazardSungaiRawa',
-        file:'Sungai atau Rawa.geojson',
-        emoji:'🌊',
-        name:'Sungai / Rawa'
-    },
-
-    potensiBanjir:{
-        checkbox:'hazardPotensiBanjir',
-        file:'Potensi Banjir.geojson',
-        emoji:'🌧️',
-        name:'Potensi Banjir'
-    },
-
-    pohonLapuk:{
-        checkbox:'hazardPohonLapuk',
-        file:'Pohon Lapuk.geojson',
-        emoji:'🌳',
-        name:'Pohon Lapuk'
-    },
-
-    lainnya:{
-        checkbox:'hazardLainnya',
-        file:'Lainnya.geojson',
-        emoji:'⚠️',
-        name:'Lainnya'
-    },
-
-    binatangBerbahaya:{
-        checkbox:'hazardBinatangBerbahaya',
-        file:'Binatang Berbahaya.geojson',
-        emoji:'🐍',
-        name:'Binatang Berbahaya'
-    }
-
+    sungaiRawa:{ checkbox:'hazardSungaiRawa', file:'Sungai atau Rawa.geojson', emoji:'🌊', name:'Sungai / Rawa' },
+    potensiBanjir:{ checkbox:'hazardPotensiBanjir', file:'Potensi Banjir.geojson', emoji:'🌧️', name:'Potensi Banjir' },
+    pohonLapuk:{ checkbox:'hazardPohonLapuk', file:'Pohon Lapuk.geojson', emoji:'🌳', name:'Pohon Lapuk' },
+    lainnya:{ checkbox:'hazardLainnya', file:'Lainnya.geojson', emoji:'⚠️', name:'Lainnya' },
+    binatangBerbahaya:{ checkbox:'hazardBinatangBerbahaya', file:'Binatang Berbahaya.geojson', emoji:'🐍', name:'Binatang Berbahaya' }
 };
 
 let sat;
@@ -547,6 +512,12 @@ function init(){
         position:'bottomleft'
     }).addTo(map);
 
+    /* TRACK KURSOR MOUSE UNTUK MENAMPILKAN KOORDINAT */
+    map.on('mousemove', function(e) {
+        document.getElementById('coords').textContent = 
+            `Lat: ${e.latlng.lat.toFixed(6)} | Lng: ${e.latlng.lng.toFixed(6)}`;
+    });
+
     /* PANES */
     map.createPane('receiverPane');
     map.createPane('sourcePane');
@@ -565,38 +536,25 @@ function init(){
     /* SATELLITE */
     sat = L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        {
-            maxZoom:MAX_ZOOM,
-            maxNativeZoom:18,
-            attribution:'Tiles © Esri'
-        }
+        { maxZoom:MAX_ZOOM, maxNativeZoom:18, attribution:'Tiles © Esri' }
     ).addTo(map);
 
     /* ROAD */
     road = L.tileLayer(
         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-        {
-            maxZoom:MAX_ZOOM,
-            attribution:'© OpenStreetMap contributors'
-        }
+        { maxZoom:MAX_ZOOM, attribution:'© OpenStreetMap contributors' }
     );
 
     /* ESRI STREET */
     street = L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-        {
-            maxZoom:MAX_ZOOM,
-            attribution:'Tiles © Esri'
-        }
+        { maxZoom:MAX_ZOOM, attribution:'Tiles © Esri' }
     );
 
     /* TOPOGRAPHIC */
     topo = L.tileLayer(
         'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-        {
-            maxZoom:MAX_ZOOM,
-            attribution:'Map data © OpenStreetMap contributors, SRTM | Map style © OpenTopoMap'
-        }
+        { maxZoom:MAX_ZOOM, attribution:'Map data © OpenStreetMap contributors, SRTM | Map style © OpenTopoMap' }
     );
     
     /* HYBRID */
@@ -604,32 +562,21 @@ function init(){
         sat,
         L.tileLayer(
             'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            {
-                opacity:.25,
-                maxZoom:MAX_ZOOM
-            }
+            { opacity:.25, maxZoom:MAX_ZOOM }
         )
     ]);
 
     /* SOURCE */
     src = L.geoJSON(null,{
         pane:'sourcePane',
-        style:{
-            color:'#FF0000',
-            weight:2.2,
-            opacity:.95
-        },
+        style:{ color:'#FF0000', weight:2.2, opacity:.95 },
         onEachFeature:linePopup
     }).addTo(map);
 
     /* RECEIVER */
     rec = L.geoJSON(null,{
         pane:'receiverPane',
-        style:{
-            color:'#003f9e',
-            weight:1.7,
-            opacity:.95
-        },
+        style:{ color:'#003f9e', weight:1.7, opacity:.95 },
         onEachFeature:linePopup
     }).addTo(map);
 
@@ -686,10 +633,6 @@ async function loadLines(){
         console.warn('Receiver line:',e);
     }
 }
-
-/* =========================================================
-   LINE POPUP
-========================================================= */
 
 function linePopup(feature,layer){
     const p = feature.properties || {};
@@ -895,7 +838,7 @@ async function loadPointsData(){
     if(spData && trData) return;
     if(pointsLoadPromise) return pointsLoadPromise;
 
-    document.getElementById('status').textContent = 'Memuat data East SP dan East TRAS...';
+    document.getElementById('statusText').textContent = 'Memuat data East SP dan East TRAS...';
 
     pointsLoadPromise = Promise.all([
         fetch(SP_GEOJSON,{cache:'no-cache'}).then(r=>{
@@ -1036,7 +979,6 @@ function drawVisibleFeatures(features,isSP,serial,b){
             const line = String(p.Line ?? '');
             const num = isSP ? p.Sp : p.Tr;
             
-            // Format SP menjadi 1 desimal di belakang koma
             let formattedNum = num;
             if (isSP && num !== null && num !== undefined && !isNaN(Number(num))) {
                 formattedNum = Number(num).toFixed(1);
@@ -1175,7 +1117,7 @@ function esc(s){
 
 function updateStatus(){
     const z = map.getZoom();
-    const el = document.getElementById('status');
+    const el = document.getElementById('statusText');
 
     if(z < POINT_MIN_ZOOM){
         el.textContent = `Zoom ${z} — zoom in untuk SP/TRAS`;
@@ -1200,28 +1142,22 @@ function locate(){
         p => {
             const lat = p.coords.latitude;
             const lng = p.coords.longitude;
-            const accuracy = p.coords.accuracy;
 
-            // Hapus penanda posisi sebelumnya jika sudah ada
             if(myLocationMarker) map.removeLayer(myLocationMarker);
-            if(myLocationCircle) map.removeLayer(myLocationCircle);
 
-            // Buat lingkaran akurasi GPS
-            myLocationCircle = L.circle([lat, lng], {
-                radius: accuracy,
-                color: '#1e88e5',
-                fillColor: '#1e88e5',
-                fillOpacity: 0.15,
-                weight: 1
-            }).addTo(map);
+            const redIcon = L.divIcon({
+                className: '',
+                html: '<div class="red-location-icon">📍</div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 30],
+                popupAnchor: [0, -30]
+            });
 
-            // Buat marker pin lokasi saya
-            myLocationMarker = L.marker([lat, lng])
+            myLocationMarker = L.marker([lat, lng], { icon: redIcon })
                 .addTo(map)
                 .bindPopup(`<b>📍 My Location</b><br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}`)
                 .openPopup();
 
-            // Arahkan kamera peta ke lokasi pengguna
             map.setView([lat, lng], 18);
         },
         () => alert('Izin lokasi tidak tersedia. Silakan izinkan akses lokasi pada browser Anda.'),
