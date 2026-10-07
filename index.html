@@ -66,8 +66,6 @@ html,body,#map{
     display:flex;
     flex-direction:column;
     gap:6px;
-    max-height:calc(100vh - 50px);
-    overflow-y:auto;
 }
 
 .p{
@@ -144,13 +142,13 @@ html,body,#map{
 }
 
 /* =========================
-   STATUS & KOORDINAT
+   STATUS & KOORDINAT (DINAUKKAN AGAR TIDAK MEPET)
 ========================= */
 #status{
     position:absolute;
     z-index:2000;
     right:10px;
-    bottom:32px;
+    bottom:32px; /* DINAUKKAN AGAR ADA JARAK RAPI DENGAN LEAFLET */
     background:rgba(255,255,255,0.92);
     padding:5px 8px;
     border-radius:7px;
@@ -346,13 +344,13 @@ html,body,#map{
         <div class="c">
 
             <label class="r">
-                <input id="srcOn" type="checkbox" checked onchange="toggleLines()">
+                <input id="srcOn" type="checkbox" checked onchange="toggleLine('src')">
                 <span class="ln src"></span>
                 Source Line
             </label>
 
             <label class="r">
-                <input id="recOn" type="checkbox" checked onchange="toggleLines()">
+                <input id="recOn" type="checkbox" checked onchange="toggleLine('rec')">
                 <span class="ln rec"></span>
                 Receiver Line
             </label>
@@ -360,13 +358,13 @@ html,body,#map{
             <label class="r">
                 <input id="spOn" type="checkbox" checked onchange="refreshPoints()">
                 <span class="pt sp"></span>
-                SP (East/Central/West)
+                East SP
             </label>
 
             <label class="r">
                 <input id="trOn" type="checkbox" checked onchange="refreshPoints()">
                 <span class="pt tr"></span>
-                TRAS (East/Central/West)
+                East TRAS
             </label>
 
             <label class="r">
@@ -604,32 +602,26 @@ function init(){
 }
 
 /* =========================================================
-   LOAD LINE (East, Central, West)
+   LOAD LINE
 ========================================================= */
 
 async function loadLines(){
-    // Array file Source & Receiver
-    const srcFiles = ['east_source_line.geojson', 'central_source_line.geojson', 'west_source_line.geojson'];
-    const recFiles = ['east_receiver_line.geojson', 'central_receiver_line.geojson', 'west_receiver_line.geojson'];
-
-    for(const f of srcFiles){
-        try{
-            const r = await fetch(f + '?v=6',{cache:'no-cache'});
-            if(r.ok) src.addData(await r.json());
-        }catch(e){
-            console.warn('Source line ('+f+'):',e);
-        }
+    try{
+        const r = await fetch('east_source_line.geojson?v=5',{cache:'no-cache'});
+        if(r.ok) src.addData(await r.json());
+    }catch(e){
+        console.warn('Source line:',e);
     }
 
-    for(const f of recFiles){
-        try{
-            const r = await fetch(f + '?v=6',{cache:'no-cache'});
-            if(r.ok) rec.addData(await r.json());
-        }catch(e){
-            console.warn('Receiver line ('+f+'):',e);
+    try{
+        const r = await fetch('east_receiver_line.geojson?v=5',{cache:'no-cache'});
+        if(r.ok){
+            rec.addData(await r.json());
+            updateReceiverLabels();
         }
+    }catch(e){
+        console.warn('Receiver line:',e);
     }
-    updateReceiverLabels();
 }
 
 function linePopup(feature,layer){
@@ -801,13 +793,11 @@ function updatePer100Labels(){
     else map.removeLayer(per100EvenLabels);
 }
 
-/* LIST GEONJSON SP & TRAS DARI EAST, CENTRAL, & WEST */
-const SP_FILES = ['east_sp.geojson?v=6', 'central_sp.geojson?v=6', 'west_sp.geojson?v=6'];
-const TRAS_FILES = ['east_tras.geojson?v=6', 'central_tras.geojson?v=6', 'west_tras.geojson?v=6'];
+const SP_GEOJSON = 'east_sp.geojson?v=6';
+const TRAS_GEOJSON = 'east_tras.geojson?v=6';
 
-let spDataCombined = { type: 'FeatureCollection', features: [] };
-let trDataCombined = { type: 'FeatureCollection', features: [] };
-
+let spData = null;
+let trData = null;
 let pointsLoadPromise = null;
 
 const spIndex = new Map();
@@ -835,33 +825,33 @@ function buildPointIndex(data,index){
 }
 
 async function loadPointsData(){
-    if(spDataCombined.features.length && trDataCombined.features.length) return;
+    if(spData && trData) return;
     if(pointsLoadPromise) return pointsLoadPromise;
 
-    document.getElementById('statusText').textContent = 'Memuat data SP & TRAS (East, Central, West)...';
+    document.getElementById('statusText').textContent = 'Memuat data East SP dan East TRAS...';
 
-    const fetchAll = files => Promise.all(
-        files.map(url => fetch(url, {cache:'no-cache'})
-            .then(r => r.ok ? r.json() : { features: [] })
-            .catch(e => { console.warn('Gagal memuat ' + url, e); return { features: [] }; })
-        )
-    );
-
-    pointsLoadPromise = Promise.all([fetchAll(SP_FILES), fetchAll(TRAS_FILES)])
-        .then(([spList, trList]) => {
-            spDataCombined.features = spList.flatMap(d => d.features || []);
-            trDataCombined.features = trList.flatMap(d => d.features || []);
-            
-            buildPointIndex(spDataCombined, spIndex);
-            buildPointIndex(trDataCombined, trIndex);
+    pointsLoadPromise = Promise.all([
+        fetch(SP_GEOJSON,{cache:'no-cache'}).then(r=>{
+            if(!r.ok) throw new Error('East SP tidak ditemukan: ' + r.status);
+            return r.json();
+        }),
+        fetch(TRAS_GEOJSON,{cache:'no-cache'}).then(r=>{
+            if(!r.ok) throw new Error('East TRAS tidak ditemukan: ' + r.status);
+            return r.json();
         })
-        .catch(e => {
-            console.warn('Gagal membaca data SP/TRAS:', e);
-            throw e;
-        })
-        .finally(() => {
-            pointsLoadPromise = null;
-        });
+    ]).then(([sp,tr])=>{
+        spData = sp;
+        trData = tr;
+        buildPointIndex(spData,spIndex);
+        buildPointIndex(trData,trIndex);
+    }).catch(e=>{
+        console.warn('Gagal membaca East SP/TRAS:',e);
+        spData = null;
+        trData = null;
+        throw e;
+    }).finally(()=>{
+        pointsLoadPromise = null;
+    });
 
     return pointsLoadPromise;
 }
@@ -976,8 +966,8 @@ function drawVisibleFeatures(features,isSP,serial,b){
         m.addTo(pointLayer);
 
         if(showLabels){
-            const line = String(p.Line ?? p.LINE ?? p.line ?? '');
-            const num = isSP ? (p.Sp ?? p.SP ?? p.sp) : (p.Tr ?? p.TR ?? p.tr ?? p.Tras ?? p.TRAS);
+            const line = String(p.Line ?? '');
+            const num = isSP ? p.Sp : p.Tr;
             
             let formattedNum = num;
             if (isSP && num !== null && num !== undefined && !isNaN(Number(num))) {
@@ -1023,22 +1013,16 @@ function isOddLine(line){
     return (parseInt(m[1],10) % 2 === 1);
 }
 
-function toggleLines(){
-    const srcOn = document.getElementById('srcOn').checked;
-    const recOn = document.getElementById('recOn').checked;
+function toggleLine(k){
+    const l = k === 'src' ? src : rec;
+    const id = k === 'src' ? 'srcOn' : 'recOn';
 
-    if(srcOn){
-        src.addTo(map);
+    if(document.getElementById(id).checked){
+        l.addTo(map);
+        if(k === 'rec') updateReceiverLabels();
     }else{
-        map.removeLayer(src);
-    }
-
-    if(recOn){
-        rec.addTo(map);
-        updateReceiverLabels();
-    }else{
-        map.removeLayer(rec);
-        map.removeLayer(receiverLabels);
+        map.removeLayer(l);
+        if(k === 'rec') map.removeLayer(receiverLabels);
     }
 }
 
@@ -1135,7 +1119,7 @@ function updateStatus(){
 }
 
 /* =========================================================
-   MY LOCATION (GPS LOCATE)
+   MY LOCATION (GPS LOCATE) - POPUP PERBAIKAN
 ========================================================= */
 
 function locate(){
@@ -1159,6 +1143,7 @@ function locate(){
                 popupAnchor: [0, -30]
             });
 
+            /* POPUP BISA DITUTUP (closeButton & closeOnClick) */
             const popupContent = `<b>📍 My Location</b><br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}`;
 
             myLocationMarker = L.marker([lat, lng], { icon: redIcon })
