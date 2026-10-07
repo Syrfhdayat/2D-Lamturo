@@ -1,1177 +1,145 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2D Lamturo WebGIS</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Peta Spasial - Central & West Lines</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<style>
-html,body,#map{
-    margin:0;
-    padding:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    font-family:Arial,sans-serif;
-}
-
-/* =========================
-   LOGO KIRI ATAS
-========================= */
-#head{
-    position:absolute;
-    z-index:2000;
-    left:10px;
-    top:10px;
-    background:#fff;
-    padding:6px 10px;
-    border-radius:10px;
-    box-shadow:0 2px 9px rgba(0,0,0,.25);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    color:#12345a;
-    font-size:14px;
-}
-
-#head img{
-    width:350px;
-    max-width:100%;
-    height:auto;
-    max-height:110px;
-    object-fit:contain;
-    display:block;
-}
-
-@media(max-width:600px){
-    #head img{
-        width:210px;
-        max-height:60px;
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-}
-
-/* =========================
-   CONTROL
-========================= */
-#ctl{
-    position:absolute;
-    z-index:2000;
-    right:10px;
-    top:10px;
-    width:205px;
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
-
-.p{
-    background:#fff;
-    border-radius:9px;
-    box-shadow:0 2px 9px rgba(0,0,0,.25);
-    overflow:hidden;
-}
-
-.h{
-    border:0;
-    background:#fff;
-    width:100%;
-    padding:10px;
-    text-align:left;
-    font-weight:bold;
-    color:#12345a;
-    cursor:pointer;
-    font-size:14px;
-}
-
-.c{
-    display:none;
-    padding:7px;
-    border-top:1px solid #ddd;
-}
-
-.p.open .c{
-    display:block;
-}
-
-.r{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    padding:5px 1px;
-    font-size:11px;
-}
-
-.ln{
-    display:inline-block;
-    width:23px;
-    height:3px;
-}
-
-.src{background:red;}
-.rec{background:#003f9e;}
-
-.pt{
-    width:11px;
-    height:11px;
-    border-radius:50%;
-    display:inline-block;
-}
-
-.sp{background:red;}
-.tr{background:#06f;}
-
-.b{
-    width:100%;
-    padding:7px;
-    margin-bottom:4px;
-    background:#fff;
-    border:1px solid #ccc;
-    border-radius:5px;
-    text-align:left;
-    font-size:11px;
-    cursor:pointer;
-}
-
-.hazard-c{
-    max-height:55vh;
-    overflow-y:auto;
-}
-
-/* =========================
-   STATUS & KOORDINAT (DINAUKKAN AGAR TIDAK MEPET)
-========================= */
-#status{
-    position:absolute;
-    z-index:2000;
-    right:10px;
-    bottom:32px; /* DINAUKKAN AGAR ADA JARAK RAPI DENGAN LEAFLET */
-    background:rgba(255,255,255,0.92);
-    padding:5px 8px;
-    border-radius:7px;
-    box-shadow:0 2px 7px rgba(0,0,0,.25);
-    font-size:10px;
-    color:#555;
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-    text-align:right;
-    pointer-events:none;
-}
-
-#coords{
-    font-weight:bold;
-    color:#12345a;
-    font-family:monospace;
-}
-
-/* =========================
-   POPUP
-========================= */
-.at{
-    border-collapse:collapse;
-    font-size:12px;
-}
-.at td{
-    padding:4px;
-    border-bottom:1px solid #ddd;
-    vertical-align:top;
-}
-.at td:first-child{
-    font-weight:bold;
-    color:#555;
-    white-space:nowrap;
-}
-.leaflet-popup-content{
-    max-height:330px;
-    overflow:auto;
-}
-
-/* =========================
-   SP / TRAS LABEL
-========================= */
-.point-label{
-    background:#fff;
-    border:1px solid currentColor;
-    border-radius:3px;
-    padding:1px 3px;
-    font-size:9px;
-    line-height:11px;
-    font-weight:bold;
-    white-space:nowrap;
-    box-shadow:0 1px 3px #0002;
-    pointer-events:none;
-    display:inline-block;
-}
-
-.point-label.spLabel{color:red;}
-.point-label.trLabel{color:#06f;}
-
-/* =========================
-   RECEIVER LINE LABEL
-========================= */
-.receiver-label{
-    background:#fff;
-    border:1px solid #003f9e;
-    border-radius:3px;
-    color:#003f9e;
-    padding:2px 4px;
-    font-size:10px;
-    line-height:12px;
-    font-weight:bold;
-    white-space:nowrap;
-    box-shadow:0 1px 3px rgba(0,0,0,.2);
-    pointer-events:none;
-}
-
-/* =========================
-   TRAS PER 100
-========================= */
-.per100-label{
-    color:#fff !important;
-    font-size:12px;
-    line-height:12px;
-    font-weight:bold;
-    white-space:nowrap;
-    background:transparent;
-    border:0;
-    padding:0;
-    margin:0;
-    box-shadow:none;
-    pointer-events:none;
-}
-
-/* =========================
-   RED LOCATION ICON
-========================= */
-.red-location-icon {
-    font-size: 26px;
-    text-align: center;
-    line-height: 26px;
-    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
-}
-
-/* =========================
-   MOBILE
-========================= */
-@media(max-width:600px){
-    #ctl{
-        width:165px;
-        right:8px;
-        top:8px;
+    html, body, #map {
+      width: 100%;
+      height: 100%;
     }
-
-    #head{
-        left:8px;
-        top:8px;
-        padding:5px 8px;
-        max-width:220px;
+    .legend-title {
+      font-weight: bold;
+      margin-bottom: 5px;
     }
-
-    #head img{
-        width:180px;
-        max-height:50px;
-    }
-
-    .h{
-        padding:9px;
-        font-size:13px;
-    }
-
-    .r{
-        font-size:10px;
-        padding:4px 1px;
-    }
-
-    #status{
-        bottom:30px;
-        right:5px;
-    }
-}
-
-/* =========================
-   HAZARD ICON
-========================= */
-.hazard-icon{
-    width:30px;
-    height:30px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:22px;
-    line-height:30px;
-    background:rgba(255,255,255,.9);
-    border-radius:50%;
-    border:2px solid #333;
-    box-shadow:0 1px 4px rgba(0,0,0,.35);
-}
-
-.hazard-icon-wrapper{
-    background:transparent;
-    border:0;
-}
-
-.hazard-menu-icon{
-    width:22px;
-    min-width:22px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    margin-right:5px;
-    font-size:17px;
-    line-height:1;
-}
-
-</style>
+  </style>
 </head>
-
 <body>
 
-<div id="head">
-    <img src="logo.png" alt="HAZARD MAP 2D LAMTURO PROJECT" onerror="this.onerror=null; this.parentElement.innerHTML='<b>HAZARD MAP 2D LAMTURO PROJECT</b>';">
-</div>
+  <div id="map"></div>
 
-<div id="map"></div>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<div id="ctl">
+  <script>
+    // 1. Inisialisasi Peta
+    const map = L.map('map').setView([0, 0], 2);
 
-    <!-- LAYERS -->
-    <div class="p">
-        <button class="h" onclick="op(this)">📚 LAYERS ▼</button>
-        <div class="c">
-
-            <label class="r">
-                <input id="srcOn" type="checkbox" checked onchange="toggleLine('src')">
-                <span class="ln src"></span>
-                Source Line
-            </label>
-
-            <label class="r">
-                <input id="recOn" type="checkbox" checked onchange="toggleLine('rec')">
-                <span class="ln rec"></span>
-                Receiver Line
-            </label>
-
-            <label class="r">
-                <input id="spOn" type="checkbox" checked onchange="refreshPoints()">
-                <span class="pt sp"></span>
-                East SP
-            </label>
-
-            <label class="r">
-                <input id="trOn" type="checkbox" checked onchange="refreshPoints()">
-                <span class="pt tr"></span>
-                East TRAS
-            </label>
-
-            <label class="r">
-                <input id="per100OddOn" type="checkbox" checked onchange="updatePer100Labels()">
-                <span class="pt tr"></span>
-                TRAS 100 Ganjil
-            </label>
-
-            <label class="r">
-                <input id="per100EvenOn" type="checkbox" checked onchange="updatePer100Labels()">
-                <span class="pt tr"></span>
-                TRAS 100 Genap
-            </label>
-
-        </div>
-    </div>
-
-    <!-- HAZARD -->
-    <div class="p">
-        <button class="h" onclick="op(this)">⚠️ HAZARD ▼</button>
-        <div class="c hazard-c">
-
-            <label class="r"><input id="hazardSungaiRawa" type="checkbox" onchange="toggleHazard('sungaiRawa')"> <span class="hazard-menu-icon">🌊</span>Sungai / Rawa</label>
-            <label class="r"><input id="hazardPotensiBanjir" type="checkbox" onchange="toggleHazard('potensiBanjir')"> <span class="hazard-menu-icon">🌧️</span>Potensi Banjir</label>
-            <label class="r"><input id="hazardPohonLapuk" type="checkbox" onchange="toggleHazard('pohonLapuk')"> <span class="hazard-menu-icon">🌳</span>Pohon Lapuk</label>
-            <label class="r"><input id="hazardLainnya" type="checkbox" onchange="toggleHazard('lainnya')"> <span class="hazard-menu-icon">⚠️</span>Lainnya</label>
-            <label class="r"><input id="hazardBinatangBerbahaya" type="checkbox" onchange="toggleHazard('binatangBerbahaya')"> <span class="hazard-menu-icon">🐍</span>Binatang Berbahaya</label>
-
-        </div>
-    </div>
-
-    <!-- BASEMAP -->
-    <div class="p">
-        <button class="h" onclick="op(this)">🗺️ BASEMAP ▼</button>
-
-        <div class="c">
-
-            <button class="b" onclick="base('sat')">
-                🛰️ Satellite
-            </button>
-
-            <button class="b" onclick="base('hyb')">
-                🌍 Hybrid
-            </button>
-
-            <button class="b" onclick="base('road')">
-                🗺️ OpenStreetMap
-            </button>
-
-            <button class="b" onclick="base('street')">
-                🏙️ Esri Street
-            </button>
-
-            <button class="b" onclick="base('topo')">
-                ⛰️ Topographic
-            </button>
-
-        </div>
-    </div>
-
-    <div class="p">
-        <button class="h" onclick="locate()">📍 My Location</button>
-    </div>
-
-</div>
-
-<div id="status">
-    <div id="statusText">Memuat WebGIS...</div>
-    <div id="coords">Lat: - | Lng: -</div>
-</div>
-
-<script>
-/* =========================================================
-   SETTING
-========================================================= */
-
-const GRID_DEG = 0.1;
-const POINT_MIN_ZOOM = 15;
-const LABEL_MIN_ZOOM = 17;
-const RECEIVER_LABEL_MAX_ZOOM = 16;
-const MAX_ZOOM = 22;
-
-let map;
-let src;
-let rec;
-
-let spL;
-let trL;
-
-let spLabels;
-let trLabels;
-
-let receiverLabels;
-
-let per100OddLabels;
-let per100EvenLabels;
-
-let hazardLayers = {};
-
-let myLocationMarker = null;
-
-const hazardConfig = {
-    sungaiRawa:{ checkbox:'hazardSungaiRawa', file:'Sungai atau Rawa.geojson', emoji:'🌊', name:'Sungai / Rawa' },
-    potensiBanjir:{ checkbox:'hazardPotensiBanjir', file:'Potensi Banjir.geojson', emoji:'🌧️', name:'Potensi Banjir' },
-    pohonLapuk:{ checkbox:'hazardPohonLapuk', file:'Pohon Lapuk.geojson', emoji:'🌳', name:'Pohon Lapuk' },
-    lainnya:{ checkbox:'hazardLainnya', file:'Lainnya.geojson', emoji:'⚠️', name:'Lainnya' },
-    binatangBerbahaya:{ checkbox:'hazardBinatangBerbahaya', file:'Binatang Berbahaya.geojson', emoji:'🐍', name:'Binatang Berbahaya' }
-};
-
-let sat;
-let hyb;
-let road;
-let street;
-let topo;
-
-let refreshSerial = 0;
-
-/* =========================================================
-   INIT MAP
-========================================================= */
-
-function init(){
-
-    map = L.map('map',{
-        zoomControl:false,
-        maxZoom:MAX_ZOOM,
-        preferCanvas:true
-    }).setView(
-        [-7.2,112.4],
-        10
-    );
-
-    /* ZOOM IN / OUT : POJOK KIRI BAWAH */
-    L.control.zoom({
-        position:'bottomleft'
+    // Basemap: OpenStreetMap
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    /* TRACK KURSOR MOUSE UNTUK MENAMPILKAN KOORDINAT */
-    map.on('mousemove', function(e) {
-        document.getElementById('coords').textContent = 
-            `Lat: ${e.latlng.lat.toFixed(6)} | Lng: ${e.latlng.lng.toFixed(6)}`;
+    // Basemap: Esri World Imagery (Satelit)
+    const esriSatelit = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri'
     });
 
-    /* PANES */
-    map.createPane('receiverPane');
-    map.createPane('sourcePane');
-    map.createPane('pointPane');
-    map.createPane('receiverLabelPane');
-    map.createPane('labelPane');
-    map.createPane('hazardPane');
+    // 2. Definisi Style berdasarkan jenis layer
+    const styleConfig = {
+      receiverLine: { color: '#e74c3c', weight: 2, dashArray: '4, 4' }, // Merah putus-putus
+      sourceLine:   { color: '#2ecc71', weight: 2 },                     // Hijau solid
+      tras:         { color: '#9b59b6', weight: 3 },                     // Ungu solid
+      spMarker: {
+        radius: 4,
+        fillColor: '#3498db',
+        color: '#ffffff',
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      }
+    };
 
-    map.getPane('receiverPane').style.zIndex = 410;
-    map.getPane('sourcePane').style.zIndex = 430;
-    map.getPane('pointPane').style.zIndex = 450;
-    map.getPane('receiverLabelPane').style.zIndex = 480;
-    map.getPane('labelPane').style.zIndex = 500;
-    map.getPane('hazardPane').style.zIndex = 520;
+    // Helper untuk memuat GeoJSON dan mengembalikan Layer Group
+    async function fetchGeoJSON(filePath, styleType) {
+      const layerGroup = L.layerGroup();
+      try {
+        const response = await fetch(filePath);
+        if (!response.ok) throw new Error(`Gagal memuat ${filePath}`);
+        const data = await response.json();
 
-    /* SATELLITE */
-    sat = L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        { maxZoom:MAX_ZOOM, maxNativeZoom:18, attribution:'Tiles © Esri' }
-    ).addTo(map);
-
-    /* ROAD */
-    road = L.tileLayer(
-        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-        { maxZoom:MAX_ZOOM, attribution:'© OpenStreetMap contributors' }
-    );
-
-    /* ESRI STREET */
-    street = L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-        { maxZoom:MAX_ZOOM, attribution:'Tiles © Esri' }
-    );
-
-    /* TOPOGRAPHIC */
-    topo = L.tileLayer(
-        'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-        { maxZoom:MAX_ZOOM, attribution:'Map data © OpenStreetMap contributors, SRTM | Map style © OpenTopoMap' }
-    );
-    
-    /* HYBRID */
-    hyb = L.layerGroup([
-        sat,
-        L.tileLayer(
-            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            { opacity:.25, maxZoom:MAX_ZOOM }
-        )
-    ]);
-
-    /* SOURCE */
-    src = L.geoJSON(null,{
-        pane:'sourcePane',
-        style:{ color:'#FF0000', weight:2.2, opacity:.95 },
-        onEachFeature:linePopup
-    }).addTo(map);
-
-    /* RECEIVER */
-    rec = L.geoJSON(null,{
-        pane:'receiverPane',
-        style:{ color:'#003f9e', weight:1.7, opacity:.95 },
-        onEachFeature:linePopup
-    }).addTo(map);
-
-    /* POINT LAYERS */
-    spL = L.layerGroup();
-    trL = L.layerGroup();
-
-    spLabels = L.layerGroup();
-    trLabels = L.layerGroup();
-
-    receiverLabels = L.layerGroup();
-
-    per100OddLabels = L.layerGroup();
-    per100EvenLabels = L.layerGroup();
-
-    Object.keys(hazardConfig).forEach(function(key){
-        hazardLayers[key] = L.layerGroup();
-    });
-
-    loadLines();
-    loadPer100Labels();
-
-    map.on('moveend zoomend',function(){
-        clearTimeout(window._refreshTimer);
-        window._refreshTimer = setTimeout(function(){
-            refreshPoints();
-            updateReceiverLabels();
-            updatePer100Labels();
-        },150);
-    });
-
-    updateStatus();
-}
-
-/* =========================================================
-   LOAD LINE
-========================================================= */
-
-async function loadLines(){
-    try{
-        const r = await fetch('east_source_line.geojson?v=5',{cache:'no-cache'});
-        if(r.ok) src.addData(await r.json());
-    }catch(e){
-        console.warn('Source line:',e);
-    }
-
-    try{
-        const r = await fetch('east_receiver_line.geojson?v=5',{cache:'no-cache'});
-        if(r.ok){
-            rec.addData(await r.json());
-            updateReceiverLabels();
-        }
-    }catch(e){
-        console.warn('Receiver line:',e);
-    }
-}
-
-function linePopup(feature,layer){
-    const p = feature.properties || {};
-    let h = '<b>📏 LINE</b><table class="at">';
-    Object.keys(p).forEach(k=>{
-        h += `<tr><td>${esc(k)}</td><td>${esc(String(p[k] ?? ''))}</td></tr>`;
-    });
-    h += '</table>';
-    layer.bindPopup(h,{maxWidth:360});
-}
-
-function getReceiverLineName(feature){
-    const p = feature.properties || {};
-    const keys = ['Line','LINE','line','Line_Name','LINE_NAME','line_name','LineName','LINENAME','Name','name','Lintasan','LINTASAN','lintasan'];
-    for(const k of keys){
-        if(p[k] !== undefined && p[k] !== null && String(p[k]).trim() !== ''){
-            return String(p[k]);
-        }
-    }
-    return '';
-}
-
-function receiverLabelPosition(layer){
-    try{
-        const latlngs = layer.getLatLngs();
-        const pts = [];
-
-        function collect(a){
-            if(!a) return;
-            for(const p of a){
-                if(p && typeof p.lat === 'number' && typeof p.lng === 'number'){
-                    pts.push(p);
-                }else if(Array.isArray(p)){
-                    collect(p);
-                }
+        const geoJsonLayer = L.geoJSON(data, {
+          style: function () {
+            return styleConfig[styleType] || {};
+          },
+          pointToLayer: function (feature, latlng) {
+            if (styleType === 'spMarker') {
+              return L.circleMarker(latlng, styleConfig.spMarker);
             }
-        }
-        collect(latlngs);
-
-        if(!pts.length) return layer.getBounds().getCenter();
-
-        const center = map.getCenter();
-        let best = pts[0];
-        let dist = Infinity;
-
-        for(const p of pts){
-            const dx = p.lng - center.lng;
-            const dy = p.lat - center.lat;
-            const d = dx*dx + dy*dy;
-            if(d < dist){
-                dist = d;
-                best = p;
+            return L.marker(latlng);
+          },
+          onEachFeature: function (feature, layer) {
+            // Popup otomatis menampilkan semua properti/atribut
+            if (feature.properties) {
+              let popupContent = '<table style="font-size:12px;">';
+              for (const [key, value] of Object.entries(feature.properties)) {
+                popupContent += `<tr><b>${key}:</b> ${value}</tr><br>`;
+              }
+              popupContent += '</table>';
+              layer.bindPopup(popupContent);
             }
-        }
-        return best;
-    }catch(e){
-        return layer.getBounds().getCenter();
-    }
-}
-
-function updateReceiverLabels(){
-    if(!receiverLabels) return;
-    receiverLabels.clearLayers();
-
-    if(!document.getElementById('recOn').checked){
-        map.removeLayer(receiverLabels);
-        return;
-    }
-
-    if(map.getZoom() > RECEIVER_LABEL_MAX_ZOOM){
-        map.removeLayer(receiverLabels);
-        return;
-    }
-
-    rec.eachLayer(function(layer){
-        if(!layer.feature) return;
-        const name = getReceiverLineName(layer.feature);
-        if(!name) return;
-        const pos = receiverLabelPosition(layer);
-
-        const icon = L.divIcon({
-            className:'',
-            html:`<div class="receiver-label">${esc(name)}</div>`,
-            iconSize:null,
-            iconAnchor:[0,6]
+          }
         });
 
-        L.marker(pos,{
-            pane:'receiverLabelPane',
-            icon:icon,
-            interactive:false
-        }).addTo(receiverLabels);
-    });
-
-    receiverLabels.addTo(map);
-}
-
-async function loadPer100Labels(){
-    try{
-        const rOdd = await fetch('Label_per_100_line_ganjil.geojson?v=5',{cache:'no-cache'});
-        if(rOdd.ok) drawPer100Labels(await rOdd.json(), per100OddLabels);
-    }catch(e){
-        console.warn('Gagal membaca label ganjil:',e);
+        layerGroup.addLayer(geoJsonLayer);
+      } catch (error) {
+        console.error(error);
+      }
+      return layerGroup;
     }
 
-    try{
-        const rEven = await fetch('Label_per_100_line_genap.geojson?v=5',{cache:'no-cache'});
-        if(rEven.ok) drawPer100Labels(await rEven.json(), per100EvenLabels);
-    }catch(e){
-        console.warn('Gagal membaca label genap:',e);
-    }
+    // 3. Load semua data GeoJSON Central & West
+    async function loadAllLayers() {
+      // Daftar file sesuai dengan struktur repository
+      const layers = {
+        // Central Area
+        'Central Receiver Line': await fetchGeoJSON('./central_receiver_line.geojson', 'receiverLine'),[cite: 26]
+        'Central Source Line':   await fetchGeoJSON('./central_source_line.geojson', 'sourceLine'),[cite: 26]
+        'Central SP':            await fetchGeoJSON('./central_sp.geojson', 'spMarker'),[cite: 26]
+        'Central Tras':          await fetchGeoJSON('./central_tras.geojson', 'tras'),[cite: 26]
+        
+        // West Area[cite: 26]
+        'West Receiver Line':    await fetchGeoJSON('./west_receiver_line.geojson', 'receiverLine'),[cite: 26]
+        'West Source Line':      await fetchGeoJSON('./west_source_line.geojson', 'sourceLine'),[cite: 26]
+        'West SP':               await fetchGeoJSON('./west_sp.geojson', 'spMarker'),[cite: 18, 26]
+        'West Tras':             await fetchGeoJSON('./west_tras.geojson', 'tras')[cite: 26]
+      };
 
-    updatePer100Labels();
-}
-
-function drawPer100Labels(data,layerGroup){
-    layerGroup.clearLayers();
-
-    (data.features || []).forEach(f=>{
-        if(!f.geometry || f.geometry.type !== 'Point') return;
-        const c = f.geometry.coordinates || [];
-        if(c.length < 2) return;
-
-        const lng = Number(c[0]);
-        const lat = Number(c[1]);
-        if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-
-        const p = f.properties || {};
-        const tras = p.TRAS ?? p.Tras ?? p.tras ?? '';
-        if(String(tras).trim()==='') return;
-
-        const isOdd = layerGroup === per100OddLabels;
-        const rotation = isOdd ? 90 : 0;
-
-        const icon = L.divIcon({
-            className:'',
-            html:`<div class="per100-label" style="color:#fff; transform:rotate(${rotation}deg); -webkit-transform:rotate(${rotation}deg); transform-origin:top left; -webkit-transform-origin:top left;">${esc(String(tras))}</div>`,
-            iconSize:null,
-            iconAnchor:[0,0]
+      // Tampilkan layer awal ke peta
+      const allBounds = L.latLngBounds();
+      for (const [name, layer] of Object.entries(layers)) {
+        layer.addTo(map);
+        layer.eachLayer(l => {
+          if (l.getBounds) allBounds.extend(l.getBounds());
         });
+      }
 
-        L.marker([lat,lng],{
-            pane:'labelPane',
-            icon:icon,
-            interactive:false,
-            keyboard:false
-        }).addTo(layerGroup);
-    });
-}
+      // Atur zoom peta agar mencakup seluruh data
+      if (allBounds.isValid()) {
+        map.fitBounds(allBounds);
+      }
 
-function updatePer100Labels(){
-    if(!per100OddLabels || !per100EvenLabels) return;
+      // 4. Tambahkan Layer Control di Pojok Kanan Atas
+      const baseMaps = {
+        "OpenStreetMap": osm,
+        "Satelit (Esri)": esriSatelit
+      };
 
-    const z = map.getZoom();
-    const oddOn = document.getElementById('per100OddOn')?.checked;
-    const evenOn = document.getElementById('per100EvenOn')?.checked;
-
-    if(z >= 17){
-        map.removeLayer(per100OddLabels);
-        map.removeLayer(per100EvenLabels);
-        return;
+      L.control.layers(baseMaps, layers, { collapsed: false }).addTo(map);
     }
 
-    if(oddOn) per100OddLabels.addTo(map);
-    else map.removeLayer(per100OddLabels);
-
-    if(evenOn) per100EvenLabels.addTo(map);
-    else map.removeLayer(per100EvenLabels);
-}
-
-const SP_GEOJSON = 'east_sp.geojson?v=6';
-const TRAS_GEOJSON = 'east_tras.geojson?v=6';
-
-let spData = null;
-let trData = null;
-let pointsLoadPromise = null;
-
-const spIndex = new Map();
-const trIndex = new Map();
-
-function cellKey(lng,lat){
-    const x = Math.floor(Number(lng) / GRID_DEG);
-    const y = Math.floor(Number(lat) / GRID_DEG);
-    return `${x}/${y}`;
-}
-
-function buildPointIndex(data,index){
-    index.clear();
-    (data.features || []).forEach(f=>{
-        if(!f.geometry || f.geometry.type !== 'Point') return;
-        const c = f.geometry.coordinates || [];
-        if(c.length < 2) return;
-        const lng = Number(c[0]);
-        const lat = Number(c[1]);
-        if(!Number.isFinite(lng) || !Number.isFinite(lat)) return;
-        const key = cellKey(lng,lat);
-        if(!index.has(key)) index.set(key,[]);
-        index.get(key).push(f);
-    });
-}
-
-async function loadPointsData(){
-    if(spData && trData) return;
-    if(pointsLoadPromise) return pointsLoadPromise;
-
-    document.getElementById('statusText').textContent = 'Memuat data East SP dan East TRAS...';
-
-    pointsLoadPromise = Promise.all([
-        fetch(SP_GEOJSON,{cache:'no-cache'}).then(r=>{
-            if(!r.ok) throw new Error('East SP tidak ditemukan: ' + r.status);
-            return r.json();
-        }),
-        fetch(TRAS_GEOJSON,{cache:'no-cache'}).then(r=>{
-            if(!r.ok) throw new Error('East TRAS tidak ditemukan: ' + r.status);
-            return r.json();
-        })
-    ]).then(([sp,tr])=>{
-        spData = sp;
-        trData = tr;
-        buildPointIndex(spData,spIndex);
-        buildPointIndex(trData,trIndex);
-    }).catch(e=>{
-        console.warn('Gagal membaca East SP/TRAS:',e);
-        spData = null;
-        trData = null;
-        throw e;
-    }).finally(()=>{
-        pointsLoadPromise = null;
-    });
-
-    return pointsLoadPromise;
-}
-
-function visibleFeatures(index){
-    const b = map.getBounds();
-    const x0 = Math.floor(b.getWest() / GRID_DEG) - 1;
-    const x1 = Math.floor(b.getEast() / GRID_DEG) + 1;
-    const y0 = Math.floor(b.getSouth() / GRID_DEG) - 1;
-    const y1 = Math.floor(b.getNorth() / GRID_DEG) + 1;
-    const out = [];
-
-    for(let x=x0; x<=x1; x++){
-        for(let y=y0; y<=y1; y++){
-            const arr = index.get(`${x}/${y}`);
-            if(arr) out.push(...arr);
-        }
-    }
-    return out;
-}
-
-function clearPointLayers(){
-    spL.clearLayers();
-    trL.clearLayers();
-    spLabels.clearLayers();
-    trLabels.clearLayers();
-}
-
-async function refreshPoints(){
-    const serial = ++refreshSerial;
-    updateStatus();
-    clearPointLayers();
-
-    if(map.getZoom() < POINT_MIN_ZOOM){
-        map.removeLayer(spL);
-        map.removeLayer(trL);
-        map.removeLayer(spLabels);
-        map.removeLayer(trLabels);
-        return;
-    }
-
-    try{
-        await loadPointsData();
-    }catch(e){
-        updateStatus();
-        return;
-    }
-
-    if(serial !== refreshSerial) return;
-
-    const showSP = document.getElementById('spOn').checked;
-    const showTR = document.getElementById('trOn').checked;
-    const b = map.getBounds();
-
-    if(showSP){
-        drawVisibleFeatures(visibleFeatures(spIndex),true,serial,b);
-        spL.addTo(map);
-    }else{
-        map.removeLayer(spL);
-    }
-
-    if(showTR){
-        drawVisibleFeatures(visibleFeatures(trIndex),false,serial,b);
-        trL.addTo(map);
-    }else{
-        map.removeLayer(trL);
-    }
-
-    if(map.getZoom() >= LABEL_MIN_ZOOM){
-        if(showSP) spLabels.addTo(map);
-        else map.removeLayer(spLabels);
-        if(showTR) trLabels.addTo(map);
-        else map.removeLayer(trLabels);
-    }else{
-        map.removeLayer(spLabels);
-        map.removeLayer(trLabels);
-    }
-
-    updateStatus();
-}
-
-/* =========================================================
-   DRAW VISIBLE GEOJSON FEATURES
-========================================================= */
-
-function drawVisibleFeatures(features,isSP,serial,b){
-    const pointLayer = isSP ? spL : trL;
-    const labelLayer = isSP ? spLabels : trLabels;
-    const showLabels = map.getZoom() >= LABEL_MIN_ZOOM;
-
-    for(const f of features){
-        if(serial !== refreshSerial) return;
-        if(!f.geometry || f.geometry.type !== 'Point') continue;
-
-        const [lng,lat] = f.geometry.coordinates || [];
-        if(!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) continue;
-        if(!b.contains([Number(lat),Number(lng)])) continue;
-
-        const p = f.properties || {};
-        const color = isSP ? 'red' : '#06f';
-
-        const m = L.circleMarker([Number(lat),Number(lng)],{
-            pane:'pointPane',
-            radius:isSP ? 3 : 2.5,
-            color:color,
-            fillColor:color,
-            fillOpacity:1,
-            weight:.6
-        });
-
-        m.bindPopup(attributePopup(isSP,p,Number(lat),Number(lng)),{maxWidth:380});
-        m.addTo(pointLayer);
-
-        if(showLabels){
-            const line = String(p.Line ?? '');
-            const num = isSP ? p.Sp : p.Tr;
-            
-            let formattedNum = num;
-            if (isSP && num !== null && num !== undefined && !isNaN(Number(num))) {
-                formattedNum = Number(num).toFixed(1);
-            }
-
-            const labelText = isSP
-                ? `${esc(line)} SP ${esc(String(formattedNum ?? ''))}`
-                : `${esc(line)} TRAS ${esc(String(num ?? ''))}`;
-            const rotation = isOddLine(line) ? 90 : 0;
-
-            const icon = L.divIcon({
-                className:'',
-                html:`<div class="point-label ${isSP ? 'spLabel' : 'trLabel'}" style="transform:rotate(${rotation}deg);-webkit-transform:rotate(${rotation}deg);transform-origin:top left;-webkit-transform-origin:top left;">${labelText}</div>`,
-                iconSize:null,
-                iconAnchor:[0,0]
-            });
-
-            L.marker([Number(lat),Number(lng)],{
-                pane:'labelPane',
-                icon:icon,
-                interactive:false,
-                keyboard:false
-            }).addTo(labelLayer);
-        }
-    }
-}
-
-function attributePopup(isSP,p,lat,lng){
-    let h = `<b>${isSP ? '🔴 SP' : '🔵 TRAS'}</b><table class="at">`;
-    Object.keys(p).forEach(k=>{
-        h += `<tr><td>${esc(k)}</td><td>${esc(String(p[k] ?? ''))}</td></tr>`;
-    });
-    h += `<tr><td>Latitude</td><td>${lat.toFixed(7)}</td></tr>`;
-    h += `<tr><td>Longitude</td><td>${lng.toFixed(7)}</td></tr>`;
-    h += '</table>';
-    return h;
-}
-
-function isOddLine(line){
-    const m = String(line).match(/(\d+)\s*$/);
-    if(!m) return false;
-    return (parseInt(m[1],10) % 2 === 1);
-}
-
-function toggleLine(k){
-    const l = k === 'src' ? src : rec;
-    const id = k === 'src' ? 'srcOn' : 'recOn';
-
-    if(document.getElementById(id).checked){
-        l.addTo(map);
-        if(k === 'rec') updateReceiverLabels();
-    }else{
-        map.removeLayer(l);
-        if(k === 'rec') map.removeLayer(receiverLabels);
-    }
-}
-
-function loadHazard(key){
-    const cfg = hazardConfig[key];
-    const layer = hazardLayers[key];
-    if(!cfg || !layer) return Promise.resolve();
-    if(layer._loaded) return Promise.resolve();
-
-    return fetch(cfg.file + '?v=1',{cache:'no-cache'})
-    .then(r => {
-        if(!r.ok) throw new Error('Hazard tidak ditemukan: ' + cfg.file);
-        return r.json();
-    })
-    .then(data => {
-        const geo = L.geoJSON(data,{
-            pane:'hazardPane',
-            style:function(){
-                return {
-                    color:'#ff6600',
-                    weight:3,
-                    opacity:.9,
-                    fillColor:'#ffcc00',
-                    fillOpacity:.25
-                };
-            },
-            pointToLayer:function(feature,latlng){
-                const icon = L.divIcon({
-                    className:'hazard-icon-wrapper',
-                    html:`<div class="hazard-icon" title="${esc(cfg.name)}">${cfg.emoji}</div>`,
-                    iconSize:[34,34],
-                    iconAnchor:[17,17],
-                    popupAnchor:[0,-17]
-                });
-                return L.marker(latlng,{icon:icon,pane:'hazardPane'});
-            },
-            onEachFeature:function(feature,lyr){
-                const p = feature.properties || {};
-                let h = `<b>⚠️ ${esc(cfg.name)}</b><table class="at">`;
-                Object.keys(p).forEach(k=>{
-                    h += `<tr><td>${esc(k)}</td><td>${esc(String(p[k] ?? ''))}</td></tr>`;
-                });
-                h += '</table>';
-                lyr.bindPopup(h,{maxWidth:380});
-            }
-        });
-        geo.addTo(layer);
-        layer._loaded = true;
-    })
-    .catch(e => console.warn('Gagal membaca hazard:',e));
-}
-
-function toggleHazard(key){
-    const cfg = hazardConfig[key];
-    const layer = hazardLayers[key];
-    if(!cfg || !layer) return;
-
-    const cb = document.getElementById(cfg.checkbox);
-    if(!cb) return;
-
-    if(cb.checked){
-        loadHazard(key).then(() => layer.addTo(map));
-    }else{
-        map.removeLayer(layer);
-    }
-}
-
-function base(k){
-    [sat,road,street,topo,hyb].forEach(x=>{
-        if(map.hasLayer(x)) map.removeLayer(x);
-    });
-    ({sat,road,street,topo,hyb}[k]).addTo(map);
-}
-
-function op(b){
-    b.parentElement.classList.toggle('open');
-}
-
-function esc(s){
-    return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-}
-
-function updateStatus(){
-    const z = map.getZoom();
-    const el = document.getElementById('statusText');
-
-    if(z < POINT_MIN_ZOOM){
-        el.textContent = `Zoom ${z} — zoom in untuk SP/TRAS`;
-    }else if(z < LABEL_MIN_ZOOM){
-        el.textContent = `Zoom ${z} — titik aktif, label muncul mulai zoom ${LABEL_MIN_ZOOM}`;
-    }else{
-        el.textContent = `Zoom ${z} — SP/TRAS aktif`;
-    }
-}
-
-/* =========================================================
-   MY LOCATION (GPS LOCATE) - POPUP PERBAIKAN
-========================================================= */
-
-function locate(){
-    if(!navigator.geolocation){
-        alert('Browser tidak mendukung GPS/lokasi.');
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        p => {
-            const lat = p.coords.latitude;
-            const lng = p.coords.longitude;
-
-            if(myLocationMarker) map.removeLayer(myLocationMarker);
-
-            const redIcon = L.divIcon({
-                className: '',
-                html: '<div class="red-location-icon">📍</div>',
-                iconSize: [30, 30],
-                iconAnchor: [15, 30],
-                popupAnchor: [0, -30]
-            });
-
-            /* POPUP BISA DITUTUP (closeButton & closeOnClick) */
-            const popupContent = `<b>📍 My Location</b><br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}`;
-
-            myLocationMarker = L.marker([lat, lng], { icon: redIcon })
-                .addTo(map)
-                .bindPopup(popupContent, {
-                    closeButton: true,
-                    closeOnClick: true,
-                    autoClose: true
-                })
-                .openPopup();
-
-            map.setView([lat, lng], 18);
-        },
-        () => alert('Izin lokasi tidak tersedia. Silakan izinkan akses lokasi pada browser Anda.'),
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        }
-    );
-}
-
-/* =========================================================
-   START
-========================================================= */
-
-init();
-
-</script>
+    loadAllLayers();
+  </script>
 </body>
 </html>
