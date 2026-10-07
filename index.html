@@ -9,7 +9,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-
 html,body,#map{
     margin:0;
     padding:0;
@@ -18,10 +17,6 @@ html,body,#map{
     overflow:hidden;
     font-family:Arial,sans-serif;
 }
-
-/* =========================================================
-   LOGO
-========================================================= */
 
 #head{
     position:absolute;
@@ -101,7 +96,26 @@ html,body,#map{
 }
 
 /* =========================================================
-   ROW
+   GLOBAL CONTROL
+========================================================= */
+
+#globalCtl{
+    position:absolute;
+    z-index:2000;
+    right:10px;
+    top:10px;
+    width:205px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+#globalCtl .p{
+    width:100%;
+}
+
+/* =========================================================
+   GENERAL
 ========================================================= */
 
 .r{
@@ -141,10 +155,6 @@ html,body,#map{
     background:#06f;
 }
 
-/* =========================================================
-   BUTTON
-========================================================= */
-
 .b{
     width:100%;
     padding:7px;
@@ -161,89 +171,9 @@ html,body,#map{
     background:#f3f6fa;
 }
 
-/* =========================================================
-   HAZARD
-========================================================= */
-
 .hazard-c{
     max-height:55vh;
     overflow-y:auto;
-}
-
-.hazard-menu-icon{
-    width:22px;
-    min-width:22px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    margin-right:5px;
-    font-size:17px;
-    line-height:1;
-}
-
-.hazard-empty{
-    padding:8px 3px;
-    color:#777;
-    font-size:11px;
-    line-height:15px;
-}
-
-/* =========================================================
-   GLOBAL CONTROL
-========================================================= */
-
-#globalCtl{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
-
-/* =========================================================
-   BLOCK SELECTOR
-========================================================= */
-
-#blockSelector{
-    display:block;
-}
-
-.block-box{
-    width:auto;
-    background:#fff;
-    text-align:left;
-}
-
-.block-box p{
-    margin:0 0 7px;
-    color:#666;
-    font-size:11px;
-}
-
-.block-buttons{
-    display:flex;
-    flex-direction:column;
-    gap:5px;
-}
-
-.block-btn{
-    width:100%;
-    border:1px solid #ccc;
-    background:#fff;
-    border-radius:5px;
-    padding:7px;
-    cursor:pointer;
-    text-align:left;
-    font-size:11px;
-    font-weight:bold;
-    color:#12345a;
-}
-
-.block-btn:hover{
-    background:#f2f5f9;
-    border-color:#12345a;
-}
-
-#backBtn{
-    display:none;
 }
 
 /* =========================================================
@@ -363,18 +293,7 @@ html,body,#map{
 }
 
 /* =========================================================
-   LOCATION
-========================================================= */
-
-.red-location-icon{
-    font-size:26px;
-    text-align:center;
-    line-height:26px;
-    filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
-}
-
-/* =========================================================
-   HAZARD ICON
+   HAZARD
 ========================================================= */
 
 .hazard-icon{
@@ -396,6 +315,125 @@ html,body,#map{
     border:0;
 }
 
+.hazard-menu-icon{
+    width:22px;
+    min-width:22px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin-right:5px;
+    font-size:17px;
+    line-height:1;
+}
+
+/* =========================================================
+   BLOCK
+========================================================= */
+
+.block-box{
+    width:auto;
+    background:#fff;
+    text-align:left;
+}
+
+.block-box p{
+    margin:0 0 7px;
+    color:#666;
+    font-size:11px;
+}
+
+.block-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.block-btn{
+    width:100%;
+    border:1px solid #ccc;
+    background:#fff;
+    border-radius:5px;
+    padding:7px;
+    cursor:pointer;
+    text-align:left;
+    font-size:11px;
+    font-weight:bold;
+    color:#12345a;
+}
+
+.block-btn:hover{
+    background:#f2f5f9;
+    border-color:#12345a;
+}
+
+/* =========================================================
+   BLOCK DETAIL
+========================================================= */
+
+#blockDetail{
+    display:none;
+}
+
+#blockDetail.active{
+    display:block;
+}
+
+.block-selected-title{
+    font-size:12px;
+    font-weight:bold;
+    color:#12345a;
+    padding:6px 2px 8px;
+    border-bottom:1px solid #ddd;
+    margin-bottom:6px;
+}
+
+/* Panel layers/hazard yang berada DI DALAM BLOCK */
+
+.block-section{
+    border:1px solid #ddd;
+    border-radius:6px;
+    margin-bottom:6px;
+    overflow:hidden;
+}
+
+.block-section-header{
+    width:100%;
+    border:0;
+    background:#f7f8fa;
+    padding:8px;
+    text-align:left;
+    font-size:11px;
+    font-weight:bold;
+    color:#12345a;
+    cursor:pointer;
+}
+
+.block-section-content{
+    display:none;
+    padding:5px 7px;
+    border-top:1px solid #ddd;
+}
+
+.block-section.open .block-section-content{
+    display:block;
+}
+
+#backBtn{
+    margin-top:4px;
+    font-weight:bold;
+}
+
+/* =========================================================
+   MY LOCATION
+========================================================= */
+
+.red-location-icon{
+    font-size:26px;
+    text-align:center;
+    line-height:26px;
+    filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+}
+
 /* =========================================================
    MOBILE
 ========================================================= */
@@ -403,6 +441,12 @@ html,body,#map{
 @media(max-width:600px){
 
     #ctl{
+        width:165px;
+        right:8px;
+        top:8px;
+    }
+
+    #globalCtl{
         width:165px;
         right:8px;
         top:8px;
@@ -435,80 +479,28 @@ html,body,#map{
         right:5px;
     }
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- =======================================================
-     LOGO
-======================================================= -->
-
 <div id="head">
-    <img
-        src="logo.png"
-        alt="HAZARD MAP 2D LAMTURO PROJECT"
-        onerror="this.onerror=null; this.parentElement.innerHTML='<b>HAZARD MAP 2D LAMTURO PROJECT</b>';"
-    >
+    <img src="logo.png"
+         alt="HAZARD MAP 2D LAMTURO PROJECT"
+         onerror="this.onerror=null; this.parentElement.innerHTML='<b>HAZARD MAP 2D LAMTURO PROJECT</b>';">
 </div>
 
 <div id="map"></div>
 
-<!-- =======================================================
-     CONTROL PANEL
-======================================================= -->
 
-<div id="ctl">
+<!-- =====================================================
+     GLOBAL CONTROL
+===================================================== -->
 
-    <!-- ===================================================
-         LAYERS
-    ==================================================== -->
+<div id="globalCtl">
 
-    <div class="p" id="layersPanel">
-
-        <button class="h" onclick="op(this)">
-            📚 LAYERS ▼
-        </button>
-
-        <div class="c" id="layersContent">
-
-            <div class="hazard-empty">
-                Pilih block untuk menampilkan layer.
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ===================================================
-         HAZARD
-    ==================================================== -->
-
-    <div class="p" id="hazardPanel">
-
-        <button class="h" onclick="op(this)">
-            ⚠️ HAZARD ▼
-        </button>
-
-        <div class="c hazard-c" id="hazardContent">
-
-            <div class="hazard-empty">
-                Pilih block untuk menampilkan hazard.
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ===================================================
-         BASEMAP
-    ==================================================== -->
-
+    <!-- BASEMAP -->
     <div class="p">
-
         <button class="h" onclick="op(this)">
             🗺️ BASEMAP ▼
         </button>
@@ -536,39 +528,27 @@ html,body,#map{
             </button>
 
         </div>
-
     </div>
 
 
-    <!-- ===================================================
-         MY LOCATION
-    ==================================================== -->
-
+    <!-- MY LOCATION -->
     <div class="p">
-
         <button class="h" onclick="locate()">
             📍 My Location
         </button>
-
     </div>
 
 
-    <!-- ===================================================
-         BLOCK
-    ==================================================== -->
+    <!-- BLOCK -->
+    <div class="p open">
 
-    <div class="p">
-
-        <button
-            class="h"
-            id="blockHeader"
-            onclick="op(this)"
-        >
-            🧭 BLOCK ▼
+        <button class="h" id="blockHeader">
+            🧭 BLOCK
         </button>
 
         <div class="c" style="display:block;">
 
+            <!-- SELECT BLOCK -->
             <div id="blockSelector">
 
                 <div class="block-box">
@@ -577,43 +557,219 @@ html,body,#map{
                         Pilih block yang ingin ditampilkan
                     </p>
 
-                    <div
-                        class="block-buttons"
-                        id="blockButtons"
-                    >
+                    <div class="block-buttons"
+                         id="blockButtons">
 
-                        <button
-                            class="block-btn"
-                            onclick="selectBlock('east')"
-                        >
+                        <button class="block-btn"
+                                onclick="selectBlock('east')">
                             EAST
                         </button>
 
-                        <button
-                            class="block-btn"
-                            onclick="selectBlock('central')"
-                        >
+                        <button class="block-btn"
+                                onclick="selectBlock('central')">
                             CENTRAL
                         </button>
 
-                        <button
-                            class="block-btn"
-                            onclick="selectBlock('west')"
-                        >
+                        <button class="block-btn"
+                                onclick="selectBlock('west')">
                             WEST
                         </button>
 
                     </div>
 
-                    <button
-                        class="b"
-                        id="backBtn"
-                        onclick="showAllBlocks()"
-                    >
-                        ← Back to Blocks
+                </div>
+
+            </div>
+
+
+            <!-- BLOCK DETAIL -->
+            <div id="blockDetail">
+
+                <div class="block-selected-title"
+                     id="selectedBlockTitle">
+                    EAST BLOCK
+                </div>
+
+
+                <!-- LAYERS -->
+                <div class="block-section"
+                     id="layersSection">
+
+                    <button class="block-section-header"
+                            onclick="toggleSection(this)">
+                        📚 LAYERS ▼
                     </button>
 
+                    <div class="block-section-content">
+
+                        <label class="r">
+                            <input id="srcOn"
+                                   type="checkbox"
+                                   checked
+                                   onchange="toggleCurrentLine('src')">
+
+                            <span class="ln src"></span>
+
+                            Source Line
+                        </label>
+
+
+                        <label class="r">
+                            <input id="recOn"
+                                   type="checkbox"
+                                   checked
+                                   onchange="toggleCurrentLine('rec')">
+
+                            <span class="ln rec"></span>
+
+                            Receiver Line
+                        </label>
+
+
+                        <label class="r">
+                            <input id="spOn"
+                                   type="checkbox"
+                                   checked
+                                   onchange="refreshCurrentPoints()">
+
+                            <span class="pt sp"></span>
+
+                            <span id="spLayerName">
+                                East SP
+                            </span>
+                        </label>
+
+
+                        <label class="r">
+                            <input id="trOn"
+                                   type="checkbox"
+                                   checked
+                                   onchange="refreshCurrentPoints()">
+
+                            <span class="pt tr"></span>
+
+                            <span id="trLayerName">
+                                East TRAS
+                            </span>
+                        </label>
+
+
+                        <label class="r"
+                               id="per100OddRow">
+
+                            <input id="per100OddOn"
+                                   type="checkbox"
+                                   checked
+                                   onchange="updateCurrentPer100Labels()">
+
+                            <span class="pt tr"></span>
+
+                            TRAS 100 Ganjil
+                        </label>
+
+
+                        <label class="r"
+                               id="per100EvenRow">
+
+                            <input id="per100EvenOn"
+                                   type="checkbox"
+                                   checked
+                                   onchange="updateCurrentPer100Labels()">
+
+                            <span class="pt tr"></span>
+
+                            TRAS 100 Genap
+                        </label>
+
+                    </div>
                 </div>
+
+
+                <!-- HAZARD -->
+                <div class="block-section"
+                     id="hazardSection">
+
+                    <button class="block-section-header"
+                            onclick="toggleSection(this)">
+                        ⚠️ HAZARD ▼
+                    </button>
+
+                    <div class="block-section-content hazard-c">
+
+                        <label class="r">
+                            <input id="hazardSungaiRawa"
+                                   type="checkbox"
+                                   onchange="toggleHazard('sungaiRawa')">
+
+                            <span class="hazard-menu-icon">
+                                🌊
+                            </span>
+
+                            Sungai / Rawa
+                        </label>
+
+
+                        <label class="r">
+                            <input id="hazardPotensiBanjir"
+                                   type="checkbox"
+                                   onchange="toggleHazard('potensiBanjir')">
+
+                            <span class="hazard-menu-icon">
+                                🌧️
+                            </span>
+
+                            Potensi Banjir
+                        </label>
+
+
+                        <label class="r">
+                            <input id="hazardPohonLapuk"
+                                   type="checkbox"
+                                   onchange="toggleHazard('pohonLapuk')">
+
+                            <span class="hazard-menu-icon">
+                                🌳
+                            </span>
+
+                            Pohon Lapuk
+                        </label>
+
+
+                        <label class="r">
+                            <input id="hazardLainnya"
+                                   type="checkbox"
+                                   onchange="toggleHazard('lainnya')">
+
+                            <span class="hazard-menu-icon">
+                                ⚠️
+                            </span>
+
+                            Lainnya
+                        </label>
+
+
+                        <label class="r">
+                            <input id="hazardBinatangBerbahaya"
+                                   type="checkbox"
+                                   onchange="toggleHazard('binatangBerbahaya')">
+
+                            <span class="hazard-menu-icon">
+                                🐍
+                            </span>
+
+                            Binatang Berbahaya
+                        </label>
+
+                    </div>
+                </div>
+
+
+                <!-- BACK -->
+                <button class="b"
+                        id="backBtn"
+                        onclick="showAllBlocks()">
+                    ← Back to Blocks
+                </button>
 
             </div>
 
@@ -624,9 +780,7 @@ html,body,#map{
 </div>
 
 
-<!-- =======================================================
-     STATUS
-======================================================= -->
+<!-- STATUS -->
 
 <div id="status">
 
@@ -663,11 +817,7 @@ let currentBlock = null;
 
 let allBlocksMode = true;
 
-let sat,
-    hyb,
-    road,
-    street,
-    topo;
+let sat,hyb,road,street,topo;
 
 let myLocationMarker = null;
 
@@ -700,17 +850,13 @@ const blockConfig = {
     central:{
         name:'CENTRAL',
 
-        sourceFile:
-            'central_source_line.geojson?v=1',
+        sourceFile:'central_source_line.geojson?v=1',
 
-        receiverFile:
-            'central_receiver_line.geojson?v=1',
+        receiverFile:'central_receiver_line.geojson?v=1',
 
-        spFile:
-            'central_sp.geojson?v=1',
+        spFile:'central_sp.geojson?v=1',
 
-        trasFile:
-            'central_tras.geojson?v=1',
+        trasFile:'central_tras.geojson?v=1',
 
         per100OddFile:null,
 
@@ -721,17 +867,13 @@ const blockConfig = {
     west:{
         name:'WEST',
 
-        sourceFile:
-            'west_source_line.geojson?v=1',
+        sourceFile:'west_source_line.geojson?v=1',
 
-        receiverFile:
-            'west_receiver_line.geojson?v=1',
+        receiverFile:'west_receiver_line.geojson?v=1',
 
-        spFile:
-            'west_sp.geojson?v=1',
+        spFile:'west_sp.geojson?v=1',
 
-        trasFile:
-            'west_tras.geojson?v=1',
+        trasFile:'west_tras.geojson?v=1',
 
         per100OddFile:null,
 
@@ -740,110 +882,86 @@ const blockConfig = {
 
 };
 
-
 const blocks = {};
 
 
 /* =========================================================
-   HAZARD CONFIG
-   Hanya EAST untuk sekarang
+   HAZARD EAST SAJA
 ========================================================= */
 
 const hazardConfig = {
 
-    east:{
+    sungaiRawa:{
+        checkbox:'hazardSungaiRawa',
 
-        sungaiRawa:{
-            checkbox:'hazardSungaiRawa',
+        file:'Sungai atau Rawa.geojson',
 
-            file:'Sungai atau Rawa.geojson',
+        emoji:'🌊',
 
-            emoji:'🌊',
-
-            name:'Sungai / Rawa'
-        },
-
-
-        potensiBanjir:{
-
-            checkbox:'hazardPotensiBanjir',
-
-            file:'Potensi Banjir.geojson',
-
-            emoji:'🌧️',
-
-            name:'Potensi Banjir'
-        },
-
-
-        pohonLapuk:{
-
-            checkbox:'hazardPohonLapuk',
-
-            file:'Pohon Lapuk.geojson',
-
-            emoji:'🌳',
-
-            name:'Pohon Lapuk'
-        },
-
-
-        lainnya:{
-
-            checkbox:'hazardLainnya',
-
-            file:'Lainnya.geojson',
-
-            emoji:'⚠️',
-
-            name:'Lainnya'
-        },
-
-
-        binatangBerbahaya:{
-
-            checkbox:'hazardBinatangBerbahaya',
-
-            file:'Binatang Berbahaya.geojson',
-
-            emoji:'🐍',
-
-            name:'Binatang Berbahaya'
-        }
-
+        name:'Sungai / Rawa'
     },
 
 
-    central:{},
+    potensiBanjir:{
+        checkbox:'hazardPotensiBanjir',
+
+        file:'Potensi Banjir.geojson',
+
+        emoji:'🌧️',
+
+        name:'Potensi Banjir'
+    },
 
 
-    west:{}
+    pohonLapuk:{
+        checkbox:'hazardPohonLapuk',
+
+        file:'Pohon Lapuk.geojson',
+
+        emoji:'🌳',
+
+        name:'Pohon Lapuk'
+    },
+
+
+    lainnya:{
+        checkbox:'hazardLainnya',
+
+        file:'Lainnya.geojson',
+
+        emoji:'⚠️',
+
+        name:'Lainnya'
+    },
+
+
+    binatangBerbahaya:{
+        checkbox:'hazardBinatangBerbahaya',
+
+        file:'Binatang Berbahaya.geojson',
+
+        emoji:'🐍',
+
+        name:'Binatang Berbahaya'
+    }
 
 };
-
 
 let hazardLayers = {};
 
 
 /* =========================================================
-   INIT MAP
+   INIT
 ========================================================= */
 
 function init(){
 
-    map = L.map(
-        'map',
-        {
-            zoomControl:false,
-
-            maxZoom:MAX_ZOOM,
-
-            preferCanvas:true
-        }
-    ).setView(
-        [-7.2,112.4],
-        10
-    );
+    map = L.map('map',{
+        zoomControl:false,
+        maxZoom:MAX_ZOOM,
+        preferCanvas:true
+    })
+    .setView([-7.2,112.4],10);
 
 
     L.control.zoom({
@@ -851,22 +969,15 @@ function init(){
     }).addTo(map);
 
 
-    map.on(
-        'mousemove',
-        function(e){
+    map.on('mousemove',function(e){
 
-            document.getElementById(
-                'coords'
-            ).textContent =
-                `Lat: ${e.latlng.lat.toFixed(6)} | Lng: ${e.latlng.lng.toFixed(6)}`;
+        document.getElementById('coords').textContent =
+            `Lat: ${e.latlng.lat.toFixed(6)} | Lng: ${e.latlng.lng.toFixed(6)}`;
 
-        }
-    );
+    });
 
 
-    /* =====================================================
-       PANES
-    ===================================================== */
+    /* PANES */
 
     map.createPane('receiverPane');
 
@@ -881,92 +992,56 @@ function init(){
     map.createPane('hazardPane');
 
 
-    map.getPane(
-        'receiverPane'
-    ).style.zIndex = 410;
+    map.getPane('receiverPane').style.zIndex = 410;
+
+    map.getPane('sourcePane').style.zIndex = 430;
+
+    map.getPane('pointPane').style.zIndex = 450;
+
+    map.getPane('receiverLabelPane').style.zIndex = 480;
+
+    map.getPane('labelPane').style.zIndex = 500;
+
+    map.getPane('hazardPane').style.zIndex = 520;
 
 
-    map.getPane(
-        'sourcePane'
-    ).style.zIndex = 430;
-
-
-    map.getPane(
-        'pointPane'
-    ).style.zIndex = 450;
-
-
-    map.getPane(
-        'receiverLabelPane'
-    ).style.zIndex = 480;
-
-
-    map.getPane(
-        'labelPane'
-    ).style.zIndex = 500;
-
-
-    map.getPane(
-        'hazardPane'
-    ).style.zIndex = 520;
-
-
-    /* =====================================================
-       BASEMAP
-    ===================================================== */
+    /* BASEMAP */
 
     sat = L.tileLayer(
-
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-
         {
             maxZoom:MAX_ZOOM,
-
             maxNativeZoom:18,
-
             attribution:'Tiles © Esri'
         }
-
     ).addTo(map);
 
 
     road = L.tileLayer(
-
         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-
         {
             maxZoom:MAX_ZOOM,
-
             attribution:'© OpenStreetMap contributors'
         }
-
     );
 
 
     street = L.tileLayer(
-
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-
         {
             maxZoom:MAX_ZOOM,
-
             attribution:'Tiles © Esri'
         }
-
     );
 
 
     topo = L.tileLayer(
-
         'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-
         {
             maxZoom:MAX_ZOOM,
-
             attribution:
                 'Map data © OpenStreetMap contributors, SRTM | Map style © OpenTopoMap'
         }
-
     );
 
 
@@ -975,178 +1050,124 @@ function init(){
         sat,
 
         L.tileLayer(
-
             'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-
             {
                 opacity:.25,
-
                 maxZoom:MAX_ZOOM
             }
-
         )
 
     ]);
 
 
-    /* =====================================================
-       BLOCK OBJECT
-    ===================================================== */
+    /* BLOCK OBJECTS */
 
-    Object.keys(
-        blockConfig
-    ).forEach(
-        key=>{
+    Object.keys(blockConfig).forEach(key=>{
 
-            blocks[key] =
-                createBlockObject(key);
+        blocks[key] =
+            createBlockObject(key);
 
-        }
-    );
+    });
 
 
-    /* =====================================================
-       HAZARD OBJECT
-    ===================================================== */
+    /* HAZARD OBJECTS */
 
-    Object.keys(
-        hazardConfig
-    ).forEach(
-        blockKey=>{
+    Object.keys(hazardConfig).forEach(key=>{
 
-            hazardLayers[blockKey] = {};
+        hazardLayers[key] =
+            L.layerGroup();
 
-            Object.keys(
-                hazardConfig[blockKey]
-            ).forEach(
-                hazardKey=>{
+    });
 
-                    hazardLayers[blockKey][hazardKey] =
-                        L.layerGroup();
-
-                }
-            );
-
-        }
-    );
-
-
-    /* =====================================================
-       LOAD LINES
-    ===================================================== */
 
     loadAllBlockLines();
 
 
-    /* =====================================================
-       MAP EVENT
-    ===================================================== */
+    map.on('moveend zoomend',function(){
 
-    map.on(
-        'moveend zoomend',
-        function(){
-
-            clearTimeout(
-                window._refreshTimer
-            );
+        clearTimeout(
+            window._refreshTimer
+        );
 
 
-            window._refreshTimer =
-                setTimeout(
-                    function(){
+        window._refreshTimer =
+            setTimeout(function(){
 
-                        if(allBlocksMode){
+                if(allBlocksMode){
 
-                            Object.keys(
-                                blocks
-                            ).forEach(
-                                key=>{
+                    Object.keys(blocks).forEach(key=>{
 
-                                    refreshBlockPoints(key);
+                        refreshBlockPoints(key);
 
-                                    updateReceiverLabels(key);
+                        updateReceiverLabels(key);
 
-                                    updatePer100Labels(key);
+                        updatePer100Labels(key);
 
-                                }
-                            );
+                    });
 
-                        }else if(currentBlock){
+                }else if(currentBlock){
 
-                            refreshBlockPoints(
-                                currentBlock
-                            );
+                    refreshBlockPoints(
+                        currentBlock
+                    );
 
-                            updateReceiverLabels(
-                                currentBlock
-                            );
+                    updateReceiverLabels(
+                        currentBlock
+                    );
 
-                            updatePer100Labels(
-                                currentBlock
-                            );
+                    updatePer100Labels(
+                        currentBlock
+                    );
 
-                        }
+                }
 
+                updateStatus();
 
-                        updateStatus();
+            },150);
 
-                    },
-                    150
-                );
-
-        }
-    );
+    });
 
 
     updateStatus();
-
 }
 
 
 /* =========================================================
-   CREATE BLOCK OBJECT
+   CREATE BLOCK
 ========================================================= */
 
 function createBlockObject(key){
 
     const source =
-        L.geoJSON(
-            null,
-            {
+        L.geoJSON(null,{
 
-                pane:'sourcePane',
+            pane:'sourcePane',
 
-                style:{
-                    color:'#FF0000',
+            style:{
+                color:'#FF0000',
+                weight:2.2,
+                opacity:.95
+            },
 
-                    weight:2.2,
+            onEachFeature:linePopup
 
-                    opacity:.95
-                },
-
-                onEachFeature:linePopup
-            }
-        );
+        });
 
 
     const receiver =
-        L.geoJSON(
-            null,
-            {
+        L.geoJSON(null,{
 
-                pane:'receiverPane',
+            pane:'receiverPane',
 
-                style:{
-                    color:'#003f9e',
+            style:{
+                color:'#003f9e',
+                weight:1.7,
+                opacity:.95
+            },
 
-                    weight:1.7,
+            onEachFeature:linePopup
 
-                    opacity:.95
-                },
-
-                onEachFeature:linePopup
-            }
-        );
+        });
 
 
     return {
@@ -1181,9 +1202,10 @@ function createBlockObject(key){
 
         pointsLoadPromise:null,
 
+        loaded:false,
+
         linesLoaded:false
     };
-
 }
 
 
@@ -1200,36 +1222,22 @@ async function loadAllBlockLines(){
 
 
     const promises =
-        Object.keys(
-            blockConfig
-        ).map(
-            key=>loadBlockLines(key)
-        );
+        Object.keys(blockConfig)
+        .map(key=>loadBlockLines(key));
 
 
-    await Promise.all(
-        promises
-    );
+    await Promise.all(promises);
 
 
-    /* =====================================================
-       INITIAL VIEW:
-       SEMUA BLOCK
-    ===================================================== */
+    Object.keys(blocks).forEach(key=>{
 
-    Object.keys(
-        blocks
-    ).forEach(
-        key=>{
+        blocks[key].source.addTo(map);
 
-            blocks[key].source.addTo(map);
+        blocks[key].receiver.addTo(map);
 
-            blocks[key].receiver.addTo(map);
+        loadBlockPointsData(key);
 
-            loadBlockPointsData(key);
-
-        }
-    );
+    });
 
 
     fitAllBlocks();
@@ -1239,35 +1247,26 @@ async function loadAllBlockLines(){
         'statusText'
     ).textContent =
         'Semua block aktif — pilih East, Central, atau West';
-
 }
 
 
 /* =========================================================
-   LOAD LINE PER BLOCK
+   LOAD LINES
 ========================================================= */
 
 async function loadBlockLines(key){
 
-    const cfg =
-        blockConfig[key];
+    const cfg = blockConfig[key];
 
-    const b =
-        blocks[key];
+    const b = blocks[key];
 
-
-    /* =====================================================
-       SOURCE
-    ===================================================== */
 
     try{
 
         const r =
             await fetch(
                 cfg.sourceFile,
-                {
-                    cache:'no-cache'
-                }
+                {cache:'no-cache'}
             );
 
 
@@ -1297,18 +1296,12 @@ async function loadBlockLines(key){
     }
 
 
-    /* =====================================================
-       RECEIVER
-    ===================================================== */
-
     try{
 
         const r =
             await fetch(
                 cfg.receiverFile,
-                {
-                    cache:'no-cache'
-                }
+                {cache:'no-cache'}
             );
 
 
@@ -1340,14 +1333,12 @@ async function loadBlockLines(key){
 
     b.linesLoaded = true;
 
-
     updateReceiverLabels(key);
-
 }
 
 
 /* =========================================================
-   FIT ALL BLOCK
+   FIT ALL
 ========================================================= */
 
 function fitAllBlocks(){
@@ -1356,39 +1347,27 @@ function fitAllBlocks(){
         L.featureGroup();
 
 
-    Object.keys(
-        blocks
-    ).forEach(
-        key=>{
+    Object.keys(blocks).forEach(key=>{
 
-            if(
-                blocks[key].source.getLayers().length
-            ){
-
-                group.addLayer(
-                    blocks[key].source
-                );
-
-            }
+        if(
+            blocks[key].source.getLayers().length
+        )
+            group.addLayer(
+                blocks[key].source
+            );
 
 
-            if(
-                blocks[key].receiver.getLayers().length
-            ){
+        if(
+            blocks[key].receiver.getLayers().length
+        )
+            group.addLayer(
+                blocks[key].receiver
+            );
 
-                group.addLayer(
-                    blocks[key].receiver
-                );
-
-            }
-
-        }
-    );
+    });
 
 
-    if(
-        group.getLayers().length
-    ){
+    if(group.getLayers().length){
 
         try{
 
@@ -1396,7 +1375,6 @@ function fitAllBlocks(){
                 group.getBounds(),
                 {
                     padding:[35,35],
-
                     maxZoom:12
                 }
             );
@@ -1404,7 +1382,6 @@ function fitAllBlocks(){
         }catch(e){}
 
     }
-
 }
 
 
@@ -1412,10 +1389,7 @@ function fitAllBlocks(){
    LINE POPUP
 ========================================================= */
 
-function linePopup(
-    feature,
-    layer
-){
+function linePopup(feature,layer){
 
     const p =
         feature.properties || {};
@@ -1425,42 +1399,31 @@ function linePopup(
         '<b>📏 LINE</b><table class="at">';
 
 
-    Object.keys(
-        p
-    ).forEach(
-        k=>{
+    Object.keys(p).forEach(k=>{
 
-            h +=
-                `<tr>
-                    <td>${esc(k)}</td>
-                    <td>${esc(String(p[k] ?? ''))}</td>
-                </tr>`;
+        h +=
+            `<tr>
+                <td>${esc(k)}</td>
+                <td>${esc(String(p[k] ?? ''))}</td>
+            </tr>`;
 
-        }
-    );
+    });
 
 
-    h +=
-        '</table>';
-
+    h += '</table>';
 
     layer.bindPopup(
         h,
-        {
-            maxWidth:360
-        }
+        {maxWidth:360}
     );
-
 }
 
 
 /* =========================================================
-   RECEIVER LINE NAME
+   RECEIVER NAME
 ========================================================= */
 
-function getReceiverLineName(
-    feature
-){
+function getReceiverLineName(feature){
 
     const p =
         feature.properties || {};
@@ -1489,25 +1452,15 @@ function getReceiverLineName(
     ];
 
 
-    for(
-        const k of keys
-    ){
+    for(const k of keys){
 
         if(
-
             p[k] !== undefined &&
-
             p[k] !== null &&
-
-            String(
-                p[k]
-            ).trim() !== ''
-
+            String(p[k]).trim() !== ''
         ){
 
-            return String(
-                p[k]
-            );
+            return String(p[k]);
 
         }
 
@@ -1515,7 +1468,6 @@ function getReceiverLineName(
 
 
     return '';
-
 }
 
 
@@ -1523,9 +1475,7 @@ function getReceiverLineName(
    RECEIVER LABEL POSITION
 ========================================================= */
 
-function receiverLabelPosition(
-    layer
-){
+function receiverLabelPosition(layer){
 
     try{
 
@@ -1541,25 +1491,17 @@ function receiverLabelPosition(
                 return;
 
 
-            for(
-                const p of a
-            ){
+            for(const p of a){
 
                 if(
-
                     p &&
-
                     typeof p.lat === 'number' &&
-
                     typeof p.lng === 'number'
-
                 ){
 
                     pts.push(p);
 
-                }else if(
-                    Array.isArray(p)
-                ){
+                }else if(Array.isArray(p)){
 
                     collect(p);
 
@@ -1581,34 +1523,28 @@ function receiverLabelPosition(
             map.getCenter();
 
 
-        let best =
-            pts[0];
+        let best = pts[0];
 
-        let dist =
-            Infinity;
+        let dist = Infinity;
 
 
-        for(
-            const p of pts
-        ){
+        for(const p of pts){
 
             const dx =
-                p.lng - center.lng;
+                p.lng-center.lng;
 
             const dy =
-                p.lat - center.lat;
+                p.lat-center.lat;
 
             const d =
-                dx*dx + dy*dy;
+                dx*dx+dy*dy;
 
 
-            if(
-                d < dist
-            ){
+            if(d<dist){
 
-                dist = d;
+                dist=d;
 
-                best = p;
+                best=p;
 
             }
 
@@ -1617,13 +1553,11 @@ function receiverLabelPosition(
 
         return best;
 
-
     }catch(e){
 
         return layer.getBounds().getCenter();
 
     }
-
 }
 
 
@@ -1631,18 +1565,13 @@ function receiverLabelPosition(
    RECEIVER LABEL
 ========================================================= */
 
-function updateReceiverLabels(
-    key
-){
+function updateReceiverLabels(key){
 
     const b =
         blocks[key];
 
 
-    if(
-        !b ||
-        !b.receiverLabels
-    )
+    if(!b || !b.receiverLabels)
         return;
 
 
@@ -1662,178 +1591,139 @@ function updateReceiverLabels(
         return;
 
 
-    b.receiver.eachLayer(
-        function(layer){
+    b.receiver.eachLayer(function(layer){
 
-            if(!layer.feature)
-                return;
-
-
-            const name =
-                getReceiverLineName(
-                    layer.feature
-                );
+        if(!layer.feature)
+            return;
 
 
-            if(!name)
-                return;
-
-
-            const pos =
-                receiverLabelPosition(
-                    layer
-                );
-
-
-            const icon =
-                L.divIcon({
-
-                    className:'',
-
-                    html:
-                        `<div class="receiver-label">
-                            ${esc(name)}
-                        </div>`,
-
-                    iconSize:null,
-
-                    iconAnchor:[0,6]
-
-                });
-
-
-            L.marker(
-                pos,
-                {
-                    pane:'receiverLabelPane',
-
-                    icon:icon,
-
-                    interactive:false
-                }
-            ).addTo(
-                b.receiverLabels
+        const name =
+            getReceiverLineName(
+                layer.feature
             );
 
-        }
-    );
+
+        if(!name)
+            return;
+
+
+        const pos =
+            receiverLabelPosition(
+                layer
+            );
+
+
+        const icon =
+            L.divIcon({
+
+                className:'',
+
+                html:
+                    `<div class="receiver-label">
+                        ${esc(name)}
+                    </div>`,
+
+                iconSize:null,
+
+                iconAnchor:[0,6]
+
+            });
+
+
+        L.marker(
+            pos,
+            {
+                pane:'receiverLabelPane',
+                icon:icon,
+                interactive:false
+            }
+        ).addTo(
+            b.receiverLabels
+        );
+
+    });
 
 
     if(
         allBlocksMode ||
-        currentBlock === key
+        currentBlock===key
     ){
 
-        b.receiverLabels.addTo(
-            map
-        );
+        if(map.hasLayer(b.receiver))
+            b.receiverLabels.addTo(map);
 
     }
-
 }
 
 
 /* =========================================================
-   GRID INDEX
+   POINT INDEX
 ========================================================= */
 
-function cellKey(
-    lng,
-    lat
-){
+function cellKey(lng,lat){
 
     const x =
         Math.floor(
-            Number(lng) /
-            GRID_DEG
+            Number(lng)/GRID_DEG
         );
-
 
     const y =
         Math.floor(
-            Number(lat) /
-            GRID_DEG
+            Number(lat)/GRID_DEG
         );
 
 
     return `${x}/${y}`;
-
 }
 
 
-/* =========================================================
-   BUILD INDEX
-========================================================= */
-
-function buildPointIndex(
-    data,
-    index
-){
+function buildPointIndex(data,index){
 
     index.clear();
 
 
-    (
-        data.features || []
-    ).forEach(
-        f=>{
+    (data.features||[]).forEach(f=>{
 
-            if(
-                !f.geometry ||
-                f.geometry.type !== 'Point'
-            )
-                return;
+        if(
+            !f.geometry ||
+            f.geometry.type!=='Point'
+        )
+            return;
 
 
-            const c =
-                f.geometry.coordinates ||
-                [];
+        const c =
+            f.geometry.coordinates||[];
 
 
-            if(
-                c.length < 2
-            )
-                return;
+        if(c.length<2)
+            return;
 
 
-            const lng =
-                Number(c[0]);
+        const lng =
+            Number(c[0]);
 
-            const lat =
-                Number(c[1]);
-
-
-            if(
-                !Number.isFinite(lng) ||
-                !Number.isFinite(lat)
-            )
-                return;
+        const lat =
+            Number(c[1]);
 
 
-            const key =
-                cellKey(
-                    lng,
-                    lat
-                );
+        if(
+            !Number.isFinite(lng) ||
+            !Number.isFinite(lat)
+        )
+            return;
 
 
-            if(
-                !index.has(key)
-            ){
-
-                index.set(
-                    key,
-                    []
-                );
-
-            }
+        const key =
+            cellKey(lng,lat);
 
 
-            index.get(key).push(f);
+        if(!index.has(key))
+            index.set(key,[]);
 
-        }
-    );
 
+        index.get(key).push(f);
+
+    });
 }
 
 
@@ -1841,9 +1731,7 @@ function buildPointIndex(
    LOAD POINT DATA
 ========================================================= */
 
-async function loadBlockPointsData(
-    key
-){
+async function loadBlockPointsData(key){
 
     const cfg =
         blockConfig[key];
@@ -1859,9 +1747,7 @@ async function loadBlockPointsData(
         return;
 
 
-    if(
-        b.pointsLoadPromise
-    )
+    if(b.pointsLoadPromise)
         return b.pointsLoadPromise;
 
 
@@ -1870,112 +1756,86 @@ async function loadBlockPointsData(
 
             fetch(
                 cfg.spFile,
-                {
-                    cache:'no-cache'
-                }
+                {cache:'no-cache'}
             )
-            .then(
-                r=>{
+            .then(r=>{
 
-                    if(!r.ok){
+                if(!r.ok)
+                    throw new Error(
+                        `${key} SP tidak ditemukan: ${r.status}`
+                    );
 
-                        throw new Error(
-                            `${key} SP tidak ditemukan: ${r.status}`
-                        );
+                return r.json();
 
-                    }
-
-                    return r.json();
-
-                }
-            ),
+            }),
 
 
             fetch(
                 cfg.trasFile,
-                {
-                    cache:'no-cache'
-                }
+                {cache:'no-cache'}
             )
-            .then(
-                r=>{
+            .then(r=>{
 
-                    if(!r.ok){
+                if(!r.ok)
+                    throw new Error(
+                        `${key} TRAS tidak ditemukan: ${r.status}`
+                    );
 
-                        throw new Error(
-                            `${key} TRAS tidak ditemukan: ${r.status}`
-                        );
+                return r.json();
 
-                    }
-
-                    return r.json();
-
-                }
-            )
+            })
 
         ])
-        .then(
-            ([sp,tr])=>{
+        .then(([sp,tr])=>{
 
-                b.spData = sp;
+            b.spData = sp;
 
-                b.trData = tr;
-
-
-                buildPointIndex(
-                    b.spData,
-                    b.spIndex
-                );
+            b.trData = tr;
 
 
-                buildPointIndex(
-                    b.trData,
-                    b.trIndex
-                );
+            buildPointIndex(
+                b.spData,
+                b.spIndex
+            );
 
 
-                /*
-                   HANYA EAST yang menggunakan
-                   file label TRAS 100.
-                */
+            buildPointIndex(
+                b.trData,
+                b.trIndex
+            );
 
-                if(
-                    key === 'east'
-                ){
 
-                    loadEastPer100Labels();
+            if(
+                !cfg.per100OddFile &&
+                !cfg.per100EvenFile
+            ){
 
-                }
+                buildAutoPer100Labels(key);
 
             }
-        )
-        .catch(
-            e=>{
 
-                console.warn(
-                    `Gagal membaca ${key} SP/TRAS:`,
-                    e
-                );
+        })
+        .catch(e=>{
+
+            console.warn(
+                `Gagal membaca ${key} SP/TRAS:`,
+                e
+            );
 
 
-                b.spData = null;
+            b.spData=null;
 
-                b.trData = null;
+            b.trData=null;
 
-            }
-        )
-        .finally(
-            ()=>{
+        })
+        .finally(()=>{
 
-                b.pointsLoadPromise =
-                    null;
+            b.pointsLoadPromise=null;
 
-            }
-        );
+        });
 
 
     return b.pointsLoadPromise;
-
 }
 
 
@@ -1983,9 +1843,7 @@ async function loadBlockPointsData(
    VISIBLE FEATURES
 ========================================================= */
 
-function visibleFeatures(
-    index
-){
+function visibleFeatures(index){
 
     const b =
         map.getBounds();
@@ -1993,51 +1851,37 @@ function visibleFeatures(
 
     const x0 =
         Math.floor(
-            b.getWest() /
-            GRID_DEG
-        ) - 1;
+            b.getWest()/GRID_DEG
+        )-1;
 
 
     const x1 =
         Math.floor(
-            b.getEast() /
-            GRID_DEG
-        ) + 1;
+            b.getEast()/GRID_DEG
+        )+1;
 
 
     const y0 =
         Math.floor(
-            b.getSouth() /
-            GRID_DEG
-        ) - 1;
+            b.getSouth()/GRID_DEG
+        )-1;
 
 
     const y1 =
         Math.floor(
-            b.getNorth() /
-            GRID_DEG
-        ) + 1;
+            b.getNorth()/GRID_DEG
+        )+1;
 
 
-    const out = [];
+    const out=[];
 
 
-    for(
-        let x=x0;
-        x<=x1;
-        x++
-    ){
+    for(let x=x0;x<=x1;x++){
 
-        for(
-            let y=y0;
-            y<=y1;
-            y++
-        ){
+        for(let y=y0;y<=y1;y++){
 
             const arr =
-                index.get(
-                    `${x}/${y}`
-                );
+                index.get(`${x}/${y}`);
 
 
             if(arr)
@@ -2049,17 +1893,14 @@ function visibleFeatures(
 
 
     return out;
-
 }
 
 
 /* =========================================================
-   REFRESH BLOCK POINTS
+   REFRESH POINTS
 ========================================================= */
 
-async function refreshBlockPoints(
-    key
-){
+async function refreshBlockPoints(key){
 
     const b =
         blocks[key];
@@ -2069,40 +1910,28 @@ async function refreshBlockPoints(
         return;
 
 
-    clearBlockPointLayers(
-        key
-    );
+    clearBlockPointLayers(key);
 
 
     if(
-        map.getZoom() <
+        map.getZoom()<
         POINT_MIN_ZOOM
     ){
 
-        map.removeLayer(
-            b.spL
-        );
+        map.removeLayer(b.spL);
 
-        map.removeLayer(
-            b.trL
-        );
+        map.removeLayer(b.trL);
 
-        map.removeLayer(
-            b.spLabels
-        );
+        map.removeLayer(b.spLabels);
 
-        map.removeLayer(
-            b.trLabels
-        );
+        map.removeLayer(b.trLabels);
 
         return;
 
     }
 
 
-    await loadBlockPointsData(
-        key
-    );
+    await loadBlockPointsData(key);
 
 
     if(
@@ -2114,37 +1943,21 @@ async function refreshBlockPoints(
 
     if(
         !allBlocksMode &&
-        currentBlock !== key
+        currentBlock!==key
     )
         return;
 
 
-    /*
-       Checkbox hanya menggunakan
-       block yang sedang dipilih.
-    */
-
-    const spCheckbox =
+    const showSP =
         document.getElementById(
             'spOn'
-        );
-
-    const trCheckbox =
-        document.getElementById(
-            'trOn'
-        );
-
-
-    const showSP =
-        spCheckbox
-            ? spCheckbox.checked
-            : true;
+        ).checked;
 
 
     const showTR =
-        trCheckbox
-            ? trCheckbox.checked
-            : true;
+        document.getElementById(
+            'trOn'
+        ).checked;
 
 
     const bounds =
@@ -2162,13 +1975,12 @@ async function refreshBlockPoints(
             bounds
         );
 
+
         b.spL.addTo(map);
 
     }else{
 
-        map.removeLayer(
-            b.spL
-        );
+        map.removeLayer(b.spL);
 
     }
 
@@ -2184,19 +1996,18 @@ async function refreshBlockPoints(
             bounds
         );
 
+
         b.trL.addTo(map);
 
     }else{
 
-        map.removeLayer(
-            b.trL
-        );
+        map.removeLayer(b.trL);
 
     }
 
 
     if(
-        map.getZoom() >=
+        map.getZoom()>=
         LABEL_MIN_ZOOM
     ){
 
@@ -2226,17 +2037,14 @@ async function refreshBlockPoints(
         );
 
     }
-
 }
 
 
 /* =========================================================
-   CLEAR POINT
+   CLEAR POINTS
 ========================================================= */
 
-function clearBlockPointLayers(
-    key
-){
+function clearBlockPointLayers(key){
 
     const b =
         blocks[key];
@@ -2253,12 +2061,11 @@ function clearBlockPointLayers(
     b.spLabels.clearLayers();
 
     b.trLabels.clearLayers();
-
 }
 
 
 /* =========================================================
-   DRAW POINT
+   DRAW POINTS
 ========================================================= */
 
 function drawVisibleFeatures(
@@ -2285,38 +2092,30 @@ function drawVisibleFeatures(
 
 
     const showLabels =
-        map.getZoom() >=
+        map.getZoom()>=
         LABEL_MIN_ZOOM;
 
 
-    for(
-        const f of features
-    ){
+    for(const f of features){
 
         if(
             !f.geometry ||
-            f.geometry.type !== 'Point'
+            f.geometry.type!=='Point'
         )
             continue;
 
 
-        const [
-            lng,
-            lat
-        ] =
-            f.geometry.coordinates || [];
+        const [lng,lat] =
+            f.geometry.coordinates||[];
 
 
         if(
-
             !Number.isFinite(
                 Number(lat)
             ) ||
-
             !Number.isFinite(
                 Number(lng)
             )
-
         )
             continue;
 
@@ -2331,7 +2130,7 @@ function drawVisibleFeatures(
 
 
         const p =
-            f.properties || {};
+            f.properties||{};
 
 
         const color =
@@ -2342,53 +2141,33 @@ function drawVisibleFeatures(
 
         const m =
             L.circleMarker(
-
                 [
                     Number(lat),
                     Number(lng)
                 ],
-
                 {
-
                     pane:'pointPane',
-
-                    radius:
-                        isSP
-                            ? 3
-                            : 2.5,
-
+                    radius:isSP?3:2.5,
                     color:color,
-
                     fillColor:color,
-
                     fillOpacity:1,
-
                     weight:.6
-
                 }
-
             );
 
 
         m.bindPopup(
-
             attributePopup(
                 isSP,
                 p,
                 Number(lat),
                 Number(lng)
             ),
-
-            {
-                maxWidth:380
-            }
-
+            {maxWidth:380}
         );
 
 
-        m.addTo(
-            pointLayer
-        );
+        m.addTo(pointLayer);
 
 
         if(showLabels){
@@ -2405,36 +2184,25 @@ function drawVisibleFeatures(
                     : p.Tr;
 
 
-            let formattedNum =
-                num;
+            let formattedNum=num;
 
 
             if(
-
                 isSP &&
-
-                num !== null &&
-
-                num !== undefined &&
-
-                !isNaN(
-                    Number(num)
-                )
-
+                num!==null &&
+                num!==undefined &&
+                !isNaN(Number(num))
             ){
 
                 formattedNum =
-                    Number(num)
-                        .toFixed(1);
+                    Number(num).toFixed(1);
 
             }
 
 
             const labelText =
                 isSP
-
                     ? `${esc(line)} SP ${esc(String(formattedNum ?? ''))}`
-
                     : `${esc(line)} TRAS ${esc(String(num ?? ''))}`;
 
 
@@ -2450,7 +2218,7 @@ function drawVisibleFeatures(
                     className:'',
 
                     html:
-                        `<div class="point-label ${isSP ? 'spLabel' : 'trLabel'}"
+                        `<div class="point-label ${isSP?'spLabel':'trLabel'}"
                         style="transform:rotate(${rotation}deg);
                         -webkit-transform:rotate(${rotation}deg);
                         transform-origin:top left;
@@ -2460,33 +2228,22 @@ function drawVisibleFeatures(
 
                     iconSize:null,
 
-                    iconAnchor:[
-                        0,
-                        0
-                    ]
+                    iconAnchor:[0,0]
 
                 });
 
 
             L.marker(
-
                 [
                     Number(lat),
                     Number(lng)
                 ],
-
                 {
-
                     pane:'labelPane',
-
                     icon:icon,
-
                     interactive:false,
-
                     keyboard:false
-
                 }
-
             ).addTo(
                 labelLayer
             );
@@ -2494,12 +2251,11 @@ function drawVisibleFeatures(
         }
 
     }
-
 }
 
 
 /* =========================================================
-   ATTRIBUTE POPUP
+   POPUP
 ========================================================= */
 
 function attributePopup(
@@ -2510,23 +2266,19 @@ function attributePopup(
 ){
 
     let h =
-        `<b>${isSP ? '🔴 SP' : '🔵 TRAS'}</b>
+        `<b>${isSP?'🔴 SP':'🔵 TRAS'}</b>
         <table class="at">`;
 
 
-    Object.keys(
-        p
-    ).forEach(
-        k=>{
+    Object.keys(p).forEach(k=>{
 
-            h +=
-                `<tr>
-                    <td>${esc(k)}</td>
-                    <td>${esc(String(p[k] ?? ''))}</td>
-                </tr>`;
+        h +=
+            `<tr>
+                <td>${esc(k)}</td>
+                <td>${esc(String(p[k] ?? ''))}</td>
+            </tr>`;
 
-        }
-    );
+    });
 
 
     h +=
@@ -2541,12 +2293,10 @@ function attributePopup(
         </tr>`;
 
 
-    h +=
-        '</table>';
+    h += '</table>';
 
 
     return h;
-
 }
 
 
@@ -2554,13 +2304,12 @@ function attributePopup(
    ODD LINE
 ========================================================= */
 
-function isOddLine(
-    line
-){
+function isOddLine(line){
 
     const m =
-        String(line)
-            .match(/(\d+)\s*$/);
+        String(line).match(
+            /(\d+)\s*$/
+        );
 
 
     if(!m)
@@ -2568,12 +2317,8 @@ function isOddLine(
 
 
     return (
-        parseInt(
-            m[1],
-            10
-        ) % 2 === 1
+        parseInt(m[1],10)%2===1
     );
-
 }
 
 
@@ -2586,52 +2331,24 @@ async function loadEastPer100Labels(){
     const b =
         blocks.east;
 
-
     const cfg =
         blockConfig.east;
 
-
-    if(
-        !cfg.per100OddFile ||
-        !cfg.per100EvenFile
-    )
-        return;
-
-
-    if(
-        b._per100Loaded
-    )
-        return;
-
-
-    b._per100Loaded = true;
-
-
-    /* =====================================================
-       GANJIL
-    ===================================================== */
 
     try{
 
         const rOdd =
             await fetch(
                 cfg.per100OddFile,
-                {
-                    cache:'no-cache'
-                }
+                {cache:'no-cache'}
             );
 
 
         if(rOdd.ok){
 
             drawPer100Labels(
-
                 await rOdd.json(),
-
-                b.per100OddLabels,
-
-                true
-
+                b.per100OddLabels
             );
 
         }
@@ -2646,31 +2363,20 @@ async function loadEastPer100Labels(){
     }
 
 
-    /* =====================================================
-       GENAP
-    ===================================================== */
-
     try{
 
         const rEven =
             await fetch(
                 cfg.per100EvenFile,
-                {
-                    cache:'no-cache'
-                }
+                {cache:'no-cache'}
             );
 
 
         if(rEven.ok){
 
             drawPer100Labels(
-
                 await rEven.json(),
-
-                b.per100EvenLabels,
-
-                false
-
+                b.per100EvenLabels
             );
 
         }
@@ -2683,12 +2389,6 @@ async function loadEastPer100Labels(){
         );
 
     }
-
-
-    updatePer100Labels(
-        'east'
-    );
-
 }
 
 
@@ -2698,133 +2398,253 @@ async function loadEastPer100Labels(){
 
 function drawPer100Labels(
     data,
-    layerGroup,
-    isOdd
+    layerGroup
 ){
 
     layerGroup.clearLayers();
 
 
-    (
-        data.features || []
-    ).forEach(
-        f=>{
+    (data.features||[]).forEach(f=>{
 
-            if(
-
-                !f.geometry ||
-
-                f.geometry.type !== 'Point'
-
-            )
-                return;
+        if(
+            !f.geometry ||
+            f.geometry.type!=='Point'
+        )
+            return;
 
 
-            const c =
-                f.geometry.coordinates ||
-                [];
+        const c =
+            f.geometry.coordinates||[];
 
 
-            if(
-                c.length < 2
-            )
-                return;
+        if(c.length<2)
+            return;
 
 
-            const lng =
-                Number(c[0]);
+        const lng =
+            Number(c[0]);
 
-            const lat =
-                Number(c[1]);
-
-
-            if(
-
-                !Number.isFinite(lat) ||
-
-                !Number.isFinite(lng)
-
-            )
-                return;
+        const lat =
+            Number(c[1]);
 
 
-            const p =
-                f.properties || {};
+        if(
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lng)
+        )
+            return;
 
 
-            const tras =
-                p.TRAS ??
-                p.Tras ??
-                p.tras ??
-                '';
+        const p =
+            f.properties||{};
 
 
-            if(
-                String(
-                    tras
-                ).trim() === ''
-            )
-                return;
+        const tras =
+            p.TRAS ??
+            p.Tras ??
+            p.tras ??
+            '';
 
 
-            const rotation =
-                isOdd
-                    ? 90
-                    : 0;
+        if(
+            String(tras).trim()===''
+        )
+            return;
 
 
-            const icon =
-                L.divIcon({
-
-                    className:'',
-
-                    html:
-                        `<div class="per100-label"
-                        style="
-                        color:#fff;
-                        transform:rotate(${rotation}deg);
-                        -webkit-transform:rotate(${rotation}deg);
-                        transform-origin:top left;
-                        -webkit-transform-origin:top left;">
-                        ${esc(String(tras))}
-                        </div>`,
-
-                    iconSize:null,
-
-                    iconAnchor:[
-                        0,
-                        0
-                    ]
-
-                });
+        const isOdd =
+            layerGroup ===
+            blocks.east.per100OddLabels;
 
 
-            L.marker(
+        const rotation =
+            isOdd
+                ? 90
+                : 0;
 
-                [
-                    lat,
-                    lng
-                ],
 
-                {
+        const icon =
+            L.divIcon({
 
-                    pane:'labelPane',
+                className:'',
 
-                    icon:icon,
+                html:
+                    `<div class="per100-label"
+                    style="color:#fff;
+                    transform:rotate(${rotation}deg);
+                    -webkit-transform:rotate(${rotation}deg);
+                    transform-origin:top left;
+                    -webkit-transform-origin:top left;">
+                    ${esc(String(tras))}
+                    </div>`,
 
-                    interactive:false,
+                iconSize:null,
 
-                    keyboard:false
+                iconAnchor:[0,0]
 
-                }
+            });
 
-            ).addTo(
-                layerGroup
+
+        L.marker(
+            [lat,lng],
+            {
+                pane:'labelPane',
+                icon:icon,
+                interactive:false,
+                keyboard:false
+            }
+        ).addTo(
+            layerGroup
+        );
+
+    });
+}
+
+
+/* =========================================================
+   AUTO PER 100 CENTRAL / WEST
+========================================================= */
+
+function buildAutoPer100Labels(key){
+
+    const b =
+        blocks[key];
+
+
+    if(!b.trData)
+        return;
+
+
+    b.per100OddLabels.clearLayers();
+
+    b.per100EvenLabels.clearLayers();
+
+
+    (b.trData.features||[]).forEach(f=>{
+
+        if(
+            !f.geometry ||
+            f.geometry.type!=='Point'
+        )
+            return;
+
+
+        const c =
+            f.geometry.coordinates||[];
+
+
+        if(c.length<2)
+            return;
+
+
+        const lng =
+            Number(c[0]);
+
+        const lat =
+            Number(c[1]);
+
+
+        if(
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lng)
+        )
+            return;
+
+
+        const p =
+            f.properties||{};
+
+
+        const num =
+            p.Tr ??
+            p.TR ??
+            p.tras ??
+            p.TRAS ??
+            p.Tras;
+
+
+        if(
+            num===undefined ||
+            num===null ||
+            String(num).trim()===''
+        )
+            return;
+
+
+        const n =
+            Number(
+                String(num)
+                .replace(',','.')
             );
 
-        }
-    );
 
+        if(!Number.isFinite(n))
+            return;
+
+
+        if(
+            Math.abs(n%100)>0.000001
+        )
+            return;
+
+
+        const line =
+            String(
+                p.Line ?? ''
+            );
+
+
+        const odd =
+            isOddLine(line);
+
+
+        const layerGroup =
+            odd
+                ? b.per100OddLabels
+                : b.per100EvenLabels;
+
+
+        const rotation =
+            odd
+                ? 90
+                : 0;
+
+
+        const icon =
+            L.divIcon({
+
+                className:'',
+
+                html:
+                    `<div class="per100-label"
+                    style="color:#fff;
+                    transform:rotate(${rotation}deg);
+                    -webkit-transform:rotate(${rotation}deg);
+                    transform-origin:top left;
+                    -webkit-transform-origin:top left;">
+                    ${esc(String(num))}
+                    </div>`,
+
+                iconSize:null,
+
+                iconAnchor:[0,0]
+
+            });
+
+
+        L.marker(
+            [lat,lng],
+            {
+                pane:'labelPane',
+                icon:icon,
+                interactive:false,
+                keyboard:false
+            }
+        ).addTo(
+            layerGroup
+        );
+
+    });
 }
 
 
@@ -2832,9 +2652,7 @@ function drawPer100Labels(
    UPDATE PER 100
 ========================================================= */
 
-function updatePer100Labels(
-    key
-){
+function updatePer100Labels(key){
 
     const b =
         blocks[key];
@@ -2844,60 +2662,20 @@ function updatePer100Labels(
         return;
 
 
-    /*
-       Hanya EAST yang mempunyai
-       per-100 label.
-    */
-
-    if(
-        key !== 'east'
-    ){
-
-        map.removeLayer(
-            b.per100OddLabels
-        );
-
-        map.removeLayer(
-            b.per100EvenLabels
-        );
-
-        return;
-
-    }
-
-
-    const oddCheckbox =
+    const oddOn =
         document.getElementById(
             'per100OddOn'
-        );
-
-
-    const evenCheckbox =
-        document.getElementById(
-            'per100EvenOn'
-        );
-
-
-    const oddOn =
-        oddCheckbox
-            ? oddCheckbox.checked
-            : false;
+        )?.checked;
 
 
     const evenOn =
-        evenCheckbox
-            ? evenCheckbox.checked
-            : false;
+        document.getElementById(
+            'per100EvenOn'
+        )?.checked;
 
-
-    /*
-       Sama seperti sistem sebelumnya:
-       per-100 hilang mulai zoom 17.
-    */
 
     if(
-        map.getZoom() >=
-        LABEL_MIN_ZOOM
+        map.getZoom()>=17
     ){
 
         map.removeLayer(
@@ -2909,24 +2687,18 @@ function updatePer100Labels(
         );
 
         return;
-
     }
 
 
     if(
-
         oddOn &&
-
         (
             allBlocksMode ||
-            currentBlock === key
+            currentBlock===key
         )
-
     ){
 
-        b.per100OddLabels.addTo(
-            map
-        );
+        b.per100OddLabels.addTo(map);
 
     }else{
 
@@ -2938,19 +2710,14 @@ function updatePer100Labels(
 
 
     if(
-
         evenOn &&
-
         (
             allBlocksMode ||
-            currentBlock === key
+            currentBlock===key
         )
-
     ){
 
-        b.per100EvenLabels.addTo(
-            map
-        );
+        b.per100EvenLabels.addTo(map);
 
     }else{
 
@@ -2959,268 +2726,6 @@ function updatePer100Labels(
         );
 
     }
-
-}
-
-
-/* =========================================================
-   BUILD LAYERS PANEL
-========================================================= */
-
-function buildLayersPanel(
-    key
-){
-
-    const content =
-        document.getElementById(
-            'layersContent'
-        );
-
-
-    if(!key){
-
-        content.innerHTML = `
-            <div class="hazard-empty">
-                Pilih block untuk menampilkan layer.
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    const name =
-        blockConfig[key].name;
-
-
-    let html = '';
-
-
-    /* =====================================================
-       SOURCE
-    ===================================================== */
-
-    html += `
-        <label class="r">
-            <input
-                id="srcOn"
-                type="checkbox"
-                checked
-                onchange="toggleCurrentLine('src')"
-            >
-
-            <span class="ln src"></span>
-
-            Source Line
-        </label>
-    `;
-
-
-    /* =====================================================
-       RECEIVER
-    ===================================================== */
-
-    html += `
-        <label class="r">
-            <input
-                id="recOn"
-                type="checkbox"
-                checked
-                onchange="toggleCurrentLine('rec')"
-            >
-
-            <span class="ln rec"></span>
-
-            Receiver Line
-        </label>
-    `;
-
-
-    /* =====================================================
-       SP
-    ===================================================== */
-
-    html += `
-        <label class="r">
-            <input
-                id="spOn"
-                type="checkbox"
-                checked
-                onchange="refreshCurrentPoints()"
-            >
-
-            <span class="pt sp"></span>
-
-            ${name} SP
-        </label>
-    `;
-
-
-    /* =====================================================
-       TRAS
-    ===================================================== */
-
-    html += `
-        <label class="r">
-            <input
-                id="trOn"
-                type="checkbox"
-                checked
-                onchange="refreshCurrentPoints()"
-            >
-
-            <span class="pt tr"></span>
-
-            ${name} TRAS
-        </label>
-    `;
-
-
-    /* =====================================================
-       EAST PER 100 ONLY
-    ===================================================== */
-
-    if(
-        key === 'east'
-    ){
-
-        html += `
-
-            <label class="r">
-
-                <input
-                    id="per100OddOn"
-                    type="checkbox"
-                    checked
-                    onchange="updateCurrentPer100Labels()"
-                >
-
-                <span class="pt tr"></span>
-
-                TRAS 100 Ganjil
-
-            </label>
-
-
-            <label class="r">
-
-                <input
-                    id="per100EvenOn"
-                    type="checkbox"
-                    checked
-                    onchange="updateCurrentPer100Labels()"
-                >
-
-                <span class="pt tr"></span>
-
-                TRAS 100 Genap
-
-            </label>
-
-        `;
-
-    }
-
-
-    content.innerHTML =
-        html;
-
-}
-
-
-/* =========================================================
-   BUILD HAZARD PANEL
-========================================================= */
-
-function buildHazardPanel(
-    key
-){
-
-    const content =
-        document.getElementById(
-            'hazardContent'
-        );
-
-
-    if(!key){
-
-        content.innerHTML = `
-            <div class="hazard-empty">
-                Pilih block untuk menampilkan hazard.
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    const config =
-        hazardConfig[key];
-
-
-    /*
-       CENTRAL / WEST
-    */
-
-    if(
-        !config ||
-        Object.keys(config).length === 0
-    ){
-
-        content.innerHTML = `
-            <div class="hazard-empty">
-                Hazard untuk ${esc(
-                    blockConfig[key].name
-                )} belum tersedia.
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    let html = '';
-
-
-    Object.keys(
-        config
-    ).forEach(
-        hazardKey=>{
-
-            const cfg =
-                config[hazardKey];
-
-
-            html += `
-
-                <label class="r">
-
-                    <input
-                        id="${cfg.checkbox}"
-                        type="checkbox"
-                        onchange="toggleHazard('${key}','${hazardKey}')"
-                    >
-
-                    <span class="hazard-menu-icon">
-                        ${cfg.emoji}
-                    </span>
-
-                    ${esc(cfg.name)}
-
-                </label>
-
-            `;
-
-        }
-    );
-
-
-    content.innerHTML =
-        html;
-
 }
 
 
@@ -3228,172 +2733,174 @@ function buildHazardPanel(
    SELECT BLOCK
 ========================================================= */
 
-async function selectBlock(
-    key
-){
+async function selectBlock(key){
 
-    if(
-        !blocks[key]
-    )
+    if(!blocks[key])
         return;
 
 
-    currentBlock =
-        key;
+    currentBlock=key;
+
+    allBlocksMode=false;
 
 
-    allBlocksMode =
-        false;
-
-
-    /* =====================================================
-       UPDATE BLOCK PANEL
-    ===================================================== */
+    /* UI BLOCK */
 
     document.getElementById(
-        'blockSelectorText'
+        'blockSelector'
+    ).style.display='none';
+
+
+    document.getElementById(
+        'blockDetail'
+    ).classList.add('active');
+
+
+    document.getElementById(
+        'selectedBlockTitle'
     ).textContent =
-        `${blockConfig[key].name} Block dipilih`;
+        `${blockConfig[key].name} BLOCK`;
 
 
     document.getElementById(
-        'blockButtons'
-    ).style.display =
-        'none';
+        'spLayerName'
+    ).textContent =
+        `${blockConfig[key].name} SP`;
 
 
     document.getElementById(
-        'backBtn'
-    ).style.display =
-        'block';
+        'trLayerName'
+    ).textContent =
+        `${blockConfig[key].name} TRAS`;
 
 
-    /* =====================================================
-       UPDATE LAYERS
-    ===================================================== */
+    /*
+       East mempunyai hazard.
+       Central dan West belum mempunyai hazard.
+    */
 
-    buildLayersPanel(
-        key
-    );
-
-
-    /* =====================================================
-       UPDATE HAZARD
-    ===================================================== */
-
-    buildHazardPanel(
-        key
-    );
+    const hazardSection =
+        document.getElementById(
+            'hazardSection'
+        );
 
 
-    /* =====================================================
-       HIDE ALL BLOCK DATA
-    ===================================================== */
+    if(key==='east'){
 
-    Object.keys(
-        blocks
-    ).forEach(
-        k=>{
+        hazardSection.style.display='block';
 
-            const b =
-                blocks[k];
+    }else{
 
+        hazardSection.style.display='none';
 
-            [
+        Object.keys(
+            hazardLayers
+        ).forEach(h=>{
 
-                b.source,
-
-                b.receiver,
-
-                b.spL,
-
-                b.trL,
-
-                b.spLabels,
-
-                b.trLabels,
-
-                b.receiverLabels,
-
-                b.per100OddLabels,
-
-                b.per100EvenLabels
-
-            ].forEach(
-                layer=>{
-
-                    map.removeLayer(
-                        layer
-                    );
-
-                }
+            map.removeLayer(
+                hazardLayers[h]
             );
 
-        }
-    );
+            const cb =
+                document.getElementById(
+                    hazardConfig[h].checkbox
+                );
+
+            if(cb)
+                cb.checked=false;
+
+        });
+
+    }
 
 
-    /* =====================================================
-       HIDE ALL HAZARDS
-    ===================================================== */
+    /*
+       Per-100 hanya tersedia secara
+       khusus untuk East.
+    */
 
-    Object.keys(
-        hazardLayers
-    ).forEach(
-        blockKey=>{
+    const oddRow =
+        document.getElementById(
+            'per100OddRow'
+        );
 
-            Object.keys(
-                hazardLayers[blockKey]
-            ).forEach(
-                hazardKey=>{
-
-                    map.removeLayer(
-                        hazardLayers[blockKey][hazardKey]
-                    );
-
-                }
-            );
-
-        }
-    );
+    const evenRow =
+        document.getElementById(
+            'per100EvenRow'
+        );
 
 
-    /* =====================================================
-       CURRENT BLOCK
-    ===================================================== */
+    if(key==='east'){
+
+        oddRow.style.display='flex';
+
+        evenRow.style.display='flex';
+
+    }else{
+
+        oddRow.style.display='none';
+
+        evenRow.style.display='none';
+
+    }
+
+
+    /*
+       Hide semua block.
+    */
+
+    Object.keys(blocks).forEach(k=>{
+
+        const b =
+            blocks[k];
+
+
+        [
+            b.source,
+            b.receiver,
+            b.spL,
+            b.trL,
+            b.spLabels,
+            b.trLabels,
+            b.receiverLabels,
+            b.per100OddLabels,
+            b.per100EvenLabels
+
+        ].forEach(layer=>{
+
+            map.removeLayer(layer);
+
+        });
+
+    });
+
+
+    /*
+       Tampilkan block yang dipilih.
+    */
 
     const b =
         blocks[key];
 
 
-    const srcOn =
+    if(
         document.getElementById(
             'srcOn'
-        )?.checked ?? true;
-
-
-    const recOn =
-        document.getElementById(
-            'recOn'
-        )?.checked ?? true;
-
-
-    if(srcOn)
+        ).checked
+    )
         b.source.addTo(map);
 
 
-    if(recOn)
+    if(
+        document.getElementById(
+            'recOn'
+        ).checked
+    )
         b.receiver.addTo(map);
 
 
-    await loadBlockPointsData(
-        key
-    );
+    await loadBlockPointsData(key);
 
-
-    /* =====================================================
-       FIT CURRENT BLOCK
-    ===================================================== */
 
     const group =
         L.featureGroup();
@@ -3401,29 +2908,21 @@ async function selectBlock(
 
     if(
         b.source.getLayers().length
-    ){
-
+    )
         group.addLayer(
             b.source
         );
 
-    }
-
 
     if(
         b.receiver.getLayers().length
-    ){
-
+    )
         group.addLayer(
             b.receiver
         );
 
-    }
 
-
-    if(
-        group.getLayers().length
-    ){
+    if(group.getLayers().length){
 
         try{
 
@@ -3431,7 +2930,6 @@ async function selectBlock(
                 group.getBounds(),
                 {
                     padding:[35,35],
-
                     maxZoom:14
                 }
             );
@@ -3441,201 +2939,132 @@ async function selectBlock(
     }
 
 
-    updateReceiverLabels(
-        key
-    );
+    updateReceiverLabels(key);
 
 
-    await refreshBlockPoints(
-        key
-    );
+    await refreshBlockPoints(key);
 
 
-    updatePer100Labels(
-        key
-    );
+    if(key==='east')
+        updatePer100Labels(key);
 
 
     updateStatus();
-
 }
 
 
 /* =========================================================
-   BACK TO ALL BLOCKS
+   BACK
 ========================================================= */
 
 function showAllBlocks(){
 
-    currentBlock =
-        null;
+    currentBlock=null;
 
-
-    allBlocksMode =
-        true;
-
-
-    /* =====================================================
-       RESET BLOCK TEXT
-    ===================================================== */
-
-    document.getElementById(
-        'blockSelectorText'
-    ).textContent =
-        'Pilih block yang ingin ditampilkan';
+    allBlocksMode=true;
 
 
     document.getElementById(
-        'blockButtons'
-    ).style.display =
-        'flex';
+        'blockSelector'
+    ).style.display='block';
 
 
     document.getElementById(
-        'backBtn'
-    ).style.display =
-        'none';
+        'blockDetail'
+    ).classList.remove('active');
 
 
-    /* =====================================================
-       RESET LAYERS PANEL
-    ===================================================== */
-
-    buildLayersPanel(
-        null
-    );
-
-
-    /* =====================================================
-       RESET HAZARD PANEL
-    ===================================================== */
-
-    buildHazardPanel(
-        null
-    );
-
-
-    /* =====================================================
-       HIDE POINT DATA
-    ===================================================== */
-
-    Object.keys(
-        blocks
-    ).forEach(
-        key=>{
-
-            const b =
-                blocks[key];
-
-
-            map.removeLayer(
-                b.spL
-            );
-
-            map.removeLayer(
-                b.trL
-            );
-
-            map.removeLayer(
-                b.spLabels
-            );
-
-            map.removeLayer(
-                b.trLabels
-            );
-
-            map.removeLayer(
-                b.receiverLabels
-            );
-
-            map.removeLayer(
-                b.per100OddLabels
-            );
-
-            map.removeLayer(
-                b.per100EvenLabels
-            );
-
-
-            /*
-               Semua source + receiver
-               kembali ditampilkan.
-            */
-
-            b.source.addTo(
-                map
-            );
-
-            b.receiver.addTo(
-                map
-            );
-
-        }
-    );
-
-
-    /* =====================================================
-       HIDE ALL HAZARDS
-    ===================================================== */
+    /*
+       Semua hazard disembunyikan.
+    */
 
     Object.keys(
         hazardLayers
-    ).forEach(
-        blockKey=>{
+    ).forEach(h=>{
 
-            Object.keys(
-                hazardLayers[blockKey]
-            ).forEach(
-                hazardKey=>{
+        map.removeLayer(
+            hazardLayers[h]
+        );
 
-                    map.removeLayer(
-                        hazardLayers[blockKey][hazardKey]
-                    );
-
-                }
+        const cb =
+            document.getElementById(
+                hazardConfig[h].checkbox
             );
 
-        }
-    );
+        if(cb)
+            cb.checked=false;
+
+    });
+
+
+    /*
+       Tampilkan semua block.
+    */
+
+    Object.keys(blocks).forEach(key=>{
+
+        const b =
+            blocks[key];
+
+
+        if(
+            b.source.getLayers().length
+        )
+            b.source.addTo(map);
+
+
+        if(
+            b.receiver.getLayers().length
+        )
+            b.receiver.addTo(map);
+
+
+        map.removeLayer(b.spL);
+
+        map.removeLayer(b.trL);
+
+        map.removeLayer(b.spLabels);
+
+        map.removeLayer(b.trLabels);
+
+        map.removeLayer(b.receiverLabels);
+
+        map.removeLayer(b.per100OddLabels);
+
+        map.removeLayer(b.per100EvenLabels);
+
+    });
 
 
     fitAllBlocks();
 
 
     updateStatus();
-
 }
 
 
 /* =========================================================
-   CURRENT LINE
+   LINE CONTROL
 ========================================================= */
 
-function toggleCurrentLine(
-    type
-){
+function toggleCurrentLine(type){
 
-    if(
-        allBlocksMode ||
-        !currentBlock
-    )
-        return;
-
-
-    const checkbox =
-        document.getElementById(
-            type === 'src'
-                ? 'srcOn'
-                : 'recOn'
-        );
-
-
-    if(!checkbox)
-        return;
+    const id =
+        type==='src'
+            ? 'srcOn'
+            : 'recOn';
 
 
     const checked =
-        checkbox.checked;
+        document.getElementById(
+            id
+        ).checked;
+
+
+    if(
+        !currentBlock
+    )
+        return;
 
 
     const b =
@@ -3643,85 +3072,64 @@ function toggleCurrentLine(
 
 
     const layer =
-        type === 'src'
+        type==='src'
             ? b.source
             : b.receiver;
 
 
     if(checked){
 
-        layer.addTo(
-            map
-        );
+        layer.addTo(map);
 
 
-        if(
-            type === 'rec'
-        ){
-
+        if(type==='rec')
             updateReceiverLabels(
                 currentBlock
             );
 
-        }
-
     }else{
 
-        map.removeLayer(
-            layer
-        );
+        map.removeLayer(layer);
 
 
-        if(
-            type === 'rec'
-        ){
-
+        if(type==='rec')
             map.removeLayer(
                 b.receiverLabels
             );
 
-        }
-
     }
-
 }
 
 
 /* =========================================================
-   CURRENT POINTS
+   POINT CONTROL
 ========================================================= */
 
 function refreshCurrentPoints(){
 
-    if(
-        !currentBlock
-    )
+    if(!currentBlock)
         return;
 
 
     refreshBlockPoints(
         currentBlock
     );
-
 }
 
 
 /* =========================================================
-   CURRENT PER 100
+   PER 100 CONTROL
 ========================================================= */
 
 function updateCurrentPer100Labels(){
 
-    if(
-        !currentBlock
-    )
+    if(!currentBlock)
         return;
 
 
     updatePer100Labels(
         currentBlock
     );
-
 }
 
 
@@ -3729,269 +3137,197 @@ function updateCurrentPer100Labels(){
    HAZARD
 ========================================================= */
 
-function loadHazard(
-    blockKey,
-    hazardKey
-){
+function loadHazard(key){
 
     const cfg =
-        hazardConfig
-        [blockKey]
-        ?.[
-            hazardKey
-        ];
+        hazardConfig[key];
 
 
     const layer =
-        hazardLayers
-        [blockKey]
-        ?.[
-            hazardKey
-        ];
+        hazardLayers[key];
 
 
-    if(
-        !cfg ||
-        !layer
-    )
+    if(!cfg || !layer)
         return Promise.resolve();
 
 
-    if(
-        layer._loaded
-    )
+    if(layer._loaded)
         return Promise.resolve();
 
 
     return fetch(
-
-        cfg.file +
-        '?v=2',
-
+        cfg.file+'?v=2',
         {
             cache:'no-cache'
         }
-
     )
-    .then(
-        r=>{
+    .then(r=>{
 
-            if(!r.ok){
-
-                throw new Error(
-                    'Hazard tidak ditemukan: ' +
-                    cfg.file
-                );
-
-            }
+        if(!r.ok)
+            throw new Error(
+                'Hazard tidak ditemukan: '+
+                cfg.file
+            );
 
 
-            return r.json();
+        return r.json();
 
-        }
-    )
-    .then(
-        data=>{
+    })
+    .then(data=>{
 
-            const geo =
-                L.geoJSON(
+        const geo =
+            L.geoJSON(
+                data,
+                {
 
-                    data,
+                    pane:'hazardPane',
 
-                    {
+                    style:function(){
 
-                        pane:'hazardPane',
+                        return {
 
+                            color:'#ff6600',
 
-                        style:function(){
+                            weight:3,
 
-                            return {
+                            opacity:.9,
 
-                                color:'#ff6600',
+                            fillColor:'#ffcc00',
 
-                                weight:3,
+                            fillOpacity:.25
 
-                                opacity:.9,
+                        };
 
-                                fillColor:'#ffcc00',
-
-                                fillOpacity:.25
-
-                            };
-
-                        },
+                    },
 
 
-                        pointToLayer:
-                            function(
-                                feature,
-                                latlng
-                            ){
+                    pointToLayer:function(
+                        feature,
+                        latlng
+                    ){
 
-                                const icon =
-                                    L.divIcon({
+                        const icon =
+                            L.divIcon({
 
-                                        className:
-                                            'hazard-icon-wrapper',
+                                className:
+                                    'hazard-icon-wrapper',
 
-                                        html:
-                                            `<div
-                                                class="hazard-icon"
-                                                title="${esc(cfg.name)}"
-                                            >
-                                                ${cfg.emoji}
-                                            </div>`,
+                                html:
+                                    `<div class="hazard-icon"
+                                    title="${esc(cfg.name)}">
+                                    ${cfg.emoji}
+                                    </div>`,
 
-                                        iconSize:[
-                                            34,
-                                            34
-                                        ],
+                                iconSize:[
+                                    34,
+                                    34
+                                ],
 
-                                        iconAnchor:[
-                                            17,
-                                            17
-                                        ],
+                                iconAnchor:[
+                                    17,
+                                    17
+                                ],
 
-                                        popupAnchor:[
-                                            0,
-                                            -17
-                                        ]
+                                popupAnchor:[
+                                    0,
+                                    -17
+                                ]
 
-                                    });
+                            });
 
 
-                                return L.marker(
-
-                                    latlng,
-
-                                    {
-
-                                        icon:icon,
-
-                                        pane:'hazardPane'
-
-                                    }
-
-                                );
-
-                            },
-
-
-                        onEachFeature:
-                            function(
-                                feature,
-                                lyr
-                            ){
-
-                                const p =
-                                    feature.properties ||
-                                    {};
-
-
-                                let h =
-                                    `<b>
-                                        ⚠️ ${esc(cfg.name)}
-                                    </b>
-                                    <table class="at">`;
-
-
-                                Object.keys(
-                                    p
-                                ).forEach(
-                                    k=>{
-
-                                        h +=
-                                            `<tr>
-                                                <td>${esc(k)}</td>
-                                                <td>${esc(String(p[k] ?? ''))}</td>
-                                            </tr>`;
-
-                                    }
-                                );
-
-
-                                h +=
-                                    '</table>';
-
-
-                                lyr.bindPopup(
-                                    h,
-                                    {
-                                        maxWidth:380
-                                    }
-                                );
-
+                        return L.marker(
+                            latlng,
+                            {
+                                icon:icon,
+                                pane:'hazardPane'
                             }
+                        );
+
+                    },
+
+
+                    onEachFeature:function(
+                        feature,
+                        lyr
+                    ){
+
+                        const p =
+                            feature.properties||{};
+
+
+                        let h =
+                            `<b>⚠️ ${esc(cfg.name)}</b>
+                            <table class="at">`;
+
+
+                        Object.keys(p)
+                        .forEach(k=>{
+
+                            h +=
+                                `<tr>
+                                    <td>${esc(k)}</td>
+                                    <td>${esc(String(p[k] ?? ''))}</td>
+                                </tr>`;
+
+                        });
+
+
+                        h +=
+                            '</table>';
+
+
+                        lyr.bindPopup(
+                            h,
+                            {
+                                maxWidth:380
+                            }
+                        );
 
                     }
 
-                );
-
-
-            geo.addTo(
-                layer
+                }
             );
 
 
-            layer._loaded =
-                true;
+        geo.addTo(layer);
 
-        }
-    )
-    .catch(
-        e=>{
+        layer._loaded=true;
 
-            console.warn(
-                'Gagal membaca hazard:',
-                e
-            );
+    })
+    .catch(e=>{
 
-        }
-    );
+        console.warn(
+            'Gagal membaca hazard:',
+            e
+        );
 
+    });
 }
 
 
-/* =========================================================
-   TOGGLE HAZARD
-========================================================= */
-
-function toggleHazard(
-    blockKey,
-    hazardKey
-){
+function toggleHazard(key){
 
     /*
-       Hazard hanya bisa aktif
-       pada block yang sedang dipilih.
+       Hazard hanya boleh aktif
+       ketika EAST dipilih.
     */
 
     if(
-        currentBlock !== blockKey
+        currentBlock!=='east'
     )
         return;
 
 
     const cfg =
-        hazardConfig
-        [blockKey]
-        ?.[
-            hazardKey
-        ];
+        hazardConfig[key];
 
 
     const layer =
-        hazardLayers
-        [blockKey]
-        ?.[
-            hazardKey
-        ];
+        hazardLayers[key];
 
 
-    if(
-        !cfg ||
-        !layer
-    )
+    if(!cfg || !layer)
         return;
 
 
@@ -4005,38 +3341,23 @@ function toggleHazard(
         return;
 
 
-    if(
-        cb.checked
-    ){
+    if(cb.checked){
 
-        loadHazard(
-            blockKey,
-            hazardKey
-        )
-        .then(
-            ()=>{
+        loadHazard(key)
+        .then(()=>{
 
-                if(
-                    currentBlock === blockKey
-                ){
+            if(
+                currentBlock==='east'
+            )
+                layer.addTo(map);
 
-                    layer.addTo(
-                        map
-                    );
-
-                }
-
-            }
-        );
+        });
 
     }else{
 
-        map.removeLayer(
-            layer
-        );
+        map.removeLayer(layer);
 
     }
-
 }
 
 
@@ -4044,9 +3365,7 @@ function toggleHazard(
    BASEMAP
 ========================================================= */
 
-function base(
-    k
-){
+function base(k){
 
     [
         sat,
@@ -4054,19 +3373,13 @@ function base(
         street,
         topo,
         hyb
-    ].forEach(
-        x=>{
 
-            if(
-                map.hasLayer(x)
-            ){
+    ].forEach(x=>{
 
-                map.removeLayer(x);
+        if(map.hasLayer(x))
+            map.removeLayer(x);
 
-            }
-
-        }
-    );
+    });
 
 
     ({
@@ -4075,40 +3388,37 @@ function base(
         street,
         topo,
         hyb
-    }[k]).addTo(
-        map
-    );
-
+    }[k]).addTo(map);
 }
 
 
 /* =========================================================
-   PANEL OPEN / CLOSE
+   PANEL
 ========================================================= */
 
-function op(
-    b
-){
+function op(b){
 
     b.parentElement.classList.toggle(
         'open'
     );
+}
 
+
+function toggleSection(btn){
+
+    btn.parentElement.classList.toggle(
+        'open'
+    );
 }
 
 
 /* =========================================================
-   ESCAPE HTML
+   ESCAPE
 ========================================================= */
 
-function esc(
-    s
-){
+function esc(s){
 
-    return String(
-        s
-    ).replace(
-
+    return String(s).replace(
         /[&<>"']/g,
 
         m=>({
@@ -4124,9 +3434,7 @@ function esc(
             "'":'&#039;'
 
         }[m])
-
     );
-
 }
 
 
@@ -4146,9 +3454,7 @@ function updateStatus(){
         );
 
 
-    if(
-        allBlocksMode
-    ){
+    if(allBlocksMode){
 
         el.textContent =
             `Zoom ${z} — East, Central, West`;
@@ -4159,14 +3465,14 @@ function updateStatus(){
 
 
     if(
-        z < POINT_MIN_ZOOM
+        z<POINT_MIN_ZOOM
     ){
 
         el.textContent =
             `Zoom ${z} — zoom in untuk SP/TRAS`;
 
     }else if(
-        z < LABEL_MIN_ZOOM
+        z<LABEL_MIN_ZOOM
     ){
 
         el.textContent =
@@ -4178,7 +3484,6 @@ function updateStatus(){
             `Zoom ${z} — ${blockConfig[currentBlock].name} SP/TRAS aktif`;
 
     }
-
 }
 
 
@@ -4188,16 +3493,13 @@ function updateStatus(){
 
 function locate(){
 
-    if(
-        !navigator.geolocation
-    ){
+    if(!navigator.geolocation){
 
         alert(
             'Browser tidak mendukung GPS/lokasi.'
         );
 
         return;
-
     }
 
 
@@ -4213,15 +3515,10 @@ function locate(){
                 p.coords.longitude;
 
 
-            if(
-                myLocationMarker
-            ){
-
+            if(myLocationMarker)
                 map.removeLayer(
                     myLocationMarker
                 );
-
-            }
 
 
             const redIcon =
@@ -4258,43 +3555,25 @@ function locate(){
 
             myLocationMarker =
                 L.marker(
-
-                    [
-                        lat,
-                        lng
-                    ],
-
+                    [lat,lng],
                     {
                         icon:redIcon
                     }
-
                 )
-                .addTo(
-                    map
-                )
+                .addTo(map)
                 .bindPopup(
-
                     popupContent,
-
                     {
-
                         closeButton:true,
-
                         closeOnClick:true,
-
                         autoClose:true
-
                     }
-
                 )
                 .openPopup();
 
 
             map.setView(
-                [
-                    lat,
-                    lng
-                ],
+                [lat,lng],
                 18
             );
 
@@ -4311,17 +3590,12 @@ function locate(){
 
 
         {
-
             enableHighAccuracy:true,
-
             timeout:10000,
-
             maximumAge:0
-
         }
 
     );
-
 }
 
 
@@ -4330,6 +3604,16 @@ function locate(){
 ========================================================= */
 
 init();
+
+
+/*
+   Load label TRAS per-100 East.
+*/
+
+loadBlockPointsData('east')
+.then(()=>{
+    loadEastPer100Labels();
+});
 
 </script>
 
