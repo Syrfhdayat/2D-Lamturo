@@ -1,17 +1,17 @@
 {
 "type": "FeatureCollection",
 "name": "Potensi Banjir",
-"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::32749" } },
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
-{ "type": "Feature", "properties": { "field_1": 1041085, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9225969.0 }, "geometry": { "type": "Point", "coordinates": [ 631300.5, 9225969.0 ] } },
-{ "type": "Feature", "properties": { "field_1": 1041086, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9225956.5 }, "geometry": { "type": "Point", "coordinates": [ 631300.5, 9225956.5 ] } },
-{ "type": "Feature", "properties": { "field_1": 1041087, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9225944.0 }, "geometry": { "type": "Point", "coordinates": [ 631300.5, 9225944.0 ] } },
-{ "type": "Feature", "properties": { "field_1": 1041139, "field_2": "Potensi banjir", "field_3": "Sungai", "field_4": 631300.5, "field_5": 9225294.0 }, "geometry": { "type": "Point", "coordinates": [ 631300.5, 9225294.0 ] } },
-{ "type": "Feature", "properties": { "field_1": 1041140, "field_2": "Potensi banjir", "field_3": "Sungai", "field_4": 631300.5, "field_5": 9225281.5 }, "geometry": { "type": "Point", "coordinates": [ 631300.5, 9225281.5 ] } },
-{ "type": "Feature", "properties": { "field_1": 1041141, "field_2": "Potensi banjir", "field_3": "Sungai", "field_4": 631300.5, "field_5": 9225269.0 }, "geometry": { "type": "Point", "coordinates": [ 631300.5, 9225269.0 ] } },
-{ "type": "Feature", "properties": { "field_1": 1041155, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9225094.0 }, "geometry": { "type": "Point", "coordinates": [ 631300.5, 9225094.0 ] } },
-{ "type": "Feature", "properties": { "field_1": 1041158, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9225056.5 }, "geometry": { "type": "Point", "coordinates": [ 631300.5, 9225056.5 ] } },
-{ "type": "Feature", "properties": { "field_1": 1041243, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9223994.0 }, "geometry": { "type": "Point", "coordinates": [ 631300.5, 9223994.0 ] } },
-{ "type": "Feature", "properties": { "field_1": 1041245, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9223969.0 }, "geometry": { "type": "Point", "coordinates": [ 631300.5, 9223969.0 ] } }
+{ "type": "Feature", "properties": { "field_1": 1041085, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9225969.0 }, "geometry": { "type": "Point", "coordinates": [ 112.188686024775549, -7.001050272521121 ] } },
+{ "type": "Feature", "properties": { "field_1": 1041086, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9225956.5 }, "geometry": { "type": "Point", "coordinates": [ 112.188686310941605, -7.001163322578226 ] } },
+{ "type": "Feature", "properties": { "field_1": 1041087, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9225944.0 }, "geometry": { "type": "Point", "coordinates": [ 112.188686597112394, -7.001276372634774 ] } },
+{ "type": "Feature", "properties": { "field_1": 1041139, "field_2": "Potensi banjir", "field_3": "Sungai", "field_4": 631300.5, "field_5": 9225294.0 }, "geometry": { "type": "Point", "coordinates": [ 112.188701484518987, -7.007154974812183 ] } },
+{ "type": "Feature", "properties": { "field_1": 1041140, "field_2": "Potensi banjir", "field_3": "Sungai", "field_4": 631300.5, "field_5": 9225281.5 }, "geometry": { "type": "Point", "coordinates": [ 112.188701770940753, -7.007268024839375 ] } },
+{ "type": "Feature", "properties": { "field_1": 1041141, "field_2": "Potensi banjir", "field_3": "Sungai", "field_4": 631300.5, "field_5": 9225269.0 }, "geometry": { "type": "Point", "coordinates": [ 112.188702057367266, -7.007381074866015 ] } },
+{ "type": "Feature", "properties": { "field_1": 1041155, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9225094.0 }, "geometry": { "type": "Point", "coordinates": [ 112.188706067835753, -7.008963775180773 ] } },
+{ "type": "Feature", "properties": { "field_1": 1041158, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9225056.5 }, "geometry": { "type": "Point", "coordinates": [ 112.188706927342622, -7.009302925234087 ] } },
+{ "type": "Feature", "properties": { "field_1": 1041243, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9223994.0 }, "geometry": { "type": "Point", "coordinates": [ 112.188731297750522, -7.018912174670778 ] } },
+{ "type": "Feature", "properties": { "field_1": 1041245, "field_2": "Potensi banjir", "field_3": "Potensi Banjir", "field_4": 631300.5, "field_5": 9223969.0 }, "geometry": { "type": "Point", "coordinates": [ 112.188731871583954, -7.019138274609258 ] } }
 ]
 }
