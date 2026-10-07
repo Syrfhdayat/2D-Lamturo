@@ -592,7 +592,7 @@ html,body,#map{
 
 
                 <!-- LAYERS -->
-                <div class="block-section"
+                <div class="block-section open"
                      id="layersSection">
 
                     <button class="block-section-header"
@@ -654,6 +654,7 @@ html,body,#map{
                         </label>
 
 
+                        <!-- PER 100 GANJIL -->
                         <label class="r"
                                id="per100OddRow">
 
@@ -668,6 +669,7 @@ html,body,#map{
                         </label>
 
 
+                        <!-- PER 100 GENAP -->
                         <label class="r"
                                id="per100EvenRow">
 
@@ -809,6 +811,8 @@ const LABEL_MIN_ZOOM = 17;
 
 const RECEIVER_LABEL_MAX_ZOOM = 16;
 
+const PER100_MAX_ZOOM = 16;
+
 const MAX_ZOOM = 22;
 
 let map;
@@ -858,6 +862,11 @@ const blockConfig = {
 
         trasFile:'central_tras.geojson?v=1',
 
+        /*
+           Central tidak punya file label per-100 khusus.
+           Label dibuat otomatis dari central_tras.geojson.
+        */
+
         per100OddFile:null,
 
         per100EvenFile:null
@@ -875,6 +884,11 @@ const blockConfig = {
 
         trasFile:'west_tras.geojson?v=1',
 
+        /*
+           West tidak punya file label per-100 khusus.
+           Label dibuat otomatis dari west_tras.geojson.
+        */
+
         per100OddFile:null,
 
         per100EvenFile:null
@@ -883,6 +897,59 @@ const blockConfig = {
 };
 
 const blocks = {};
+
+
+/* =========================================================
+   LAYER STATE PER BLOCK
+========================================================= */
+
+const layerState = {
+
+    east:{
+        src:true,
+        rec:true,
+        sp:true,
+        tr:true,
+        per100Odd:true,
+        per100Even:true
+    },
+
+    central:{
+        src:true,
+        rec:true,
+        sp:true,
+        tr:true,
+        per100Odd:true,
+        per100Even:true
+    },
+
+    west:{
+        src:true,
+        rec:true,
+        sp:true,
+        tr:true,
+        per100Odd:true,
+        per100Even:true
+    }
+
+};
+
+
+/* =========================================================
+   HAZARD STATE
+========================================================= */
+
+const hazardState = {
+
+    east:{
+        sungaiRawa:false,
+        potensiBanjir:false,
+        pohonLapuk:false,
+        lainnya:false,
+        binatangBerbahaya:false
+    }
+
+};
 
 
 /* =========================================================
@@ -1188,6 +1255,11 @@ function createBlockObject(key){
 
         receiverLabels:L.layerGroup(),
 
+        /*
+           INI ADALAH LAYER TRAS 100
+           YANG BISA ON/OFF.
+        */
+
         per100OddLabels:L.layerGroup(),
 
         per100EvenLabels:L.layerGroup(),
@@ -1205,6 +1277,7 @@ function createBlockObject(key){
         loaded:false,
 
         linesLoaded:false
+
     };
 }
 
@@ -1645,12 +1718,14 @@ function updateReceiverLabels(key){
 
 
     if(
-        allBlocksMode ||
-        currentBlock===key
+        (
+            allBlocksMode ||
+            currentBlock===key
+        ) &&
+        map.hasLayer(b.receiver)
     ){
 
-        if(map.hasLayer(b.receiver))
-            b.receiverLabels.addTo(map);
+        b.receiverLabels.addTo(map);
 
     }
 }
@@ -1805,6 +1880,14 @@ async function loadBlockPointsData(key){
             );
 
 
+            /*
+               EAST:
+               gunakan file label khusus.
+
+               CENTRAL / WEST:
+               generate otomatis dari TRAS.
+            */
+
             if(
                 !cfg.per100OddFile &&
                 !cfg.per100EvenFile
@@ -1948,16 +2031,20 @@ async function refreshBlockPoints(key){
         return;
 
 
+    /*
+       BACA STATE SESUAI BLOCK.
+    */
+
+    const state =
+        layerState[key];
+
+
     const showSP =
-        document.getElementById(
-            'spOn'
-        ).checked;
+        state.sp;
 
 
     const showTR =
-        document.getElementById(
-            'trOn'
-        ).checked;
+        state.tr;
 
 
     const bounds =
@@ -2348,7 +2435,8 @@ async function loadEastPer100Labels(){
 
             drawPer100Labels(
                 await rOdd.json(),
-                b.per100OddLabels
+                b.per100OddLabels,
+                true
             );
 
         }
@@ -2376,7 +2464,8 @@ async function loadEastPer100Labels(){
 
             drawPer100Labels(
                 await rEven.json(),
-                b.per100EvenLabels
+                b.per100EvenLabels,
+                false
             );
 
         }
@@ -2398,7 +2487,8 @@ async function loadEastPer100Labels(){
 
 function drawPer100Labels(
     data,
-    layerGroup
+    layerGroup,
+    isOdd
 ){
 
     layerGroup.clearLayers();
@@ -2450,11 +2540,6 @@ function drawPer100Labels(
             String(tras).trim()===''
         )
             return;
-
-
-        const isOdd =
-            layerGroup ===
-            blocks.east.per100OddLabels;
 
 
         const rotation =
@@ -2511,7 +2596,7 @@ function buildAutoPer100Labels(key){
         blocks[key];
 
 
-    if(!b.trData)
+    if(!b || !b.trData)
         return;
 
 
@@ -2555,12 +2640,21 @@ function buildAutoPer100Labels(key){
             f.properties||{};
 
 
+        /*
+           Coba beberapa kemungkinan
+           nama field TRAS.
+        */
+
         const num =
             p.Tr ??
             p.TR ??
             p.tras ??
             p.TRAS ??
-            p.Tras;
+            p.Tras ??
+            p.Tras_No ??
+            p.TRAS_NO ??
+            p.TrasNo ??
+            p.TRASNO;
 
 
         if(
@@ -2582,6 +2676,16 @@ function buildAutoPer100Labels(key){
             return;
 
 
+        /*
+           Hanya ambil TRAS kelipatan 100.
+           Contoh:
+           100
+           200
+           300
+           400
+           dst.
+        */
+
         if(
             Math.abs(n%100)>0.000001
         )
@@ -2590,7 +2694,10 @@ function buildAutoPer100Labels(key){
 
         const line =
             String(
-                p.Line ?? ''
+                p.Line ??
+                p.LINE ??
+                p.line ??
+                ''
             );
 
 
@@ -2645,6 +2752,20 @@ function buildAutoPer100Labels(key){
         );
 
     });
+
+
+    /*
+       Kalau block sedang aktif,
+       langsung update tampilan layer.
+    */
+
+    if(
+        currentBlock===key
+    ){
+
+        updatePer100Labels(key);
+
+    }
 }
 
 
@@ -2662,36 +2783,26 @@ function updatePer100Labels(key){
         return;
 
 
-    const oddOn =
-        document.getElementById(
-            'per100OddOn'
-        )?.checked;
+    const state =
+        layerState[key];
 
 
-    const evenOn =
-        document.getElementById(
-            'per100EvenOn'
-        )?.checked;
+    /*
+       PER 100 hanya tampil
+       sampai zoom 16.
+    */
+
+    const zoomAllowed =
+        map.getZoom()<=PER100_MAX_ZOOM;
 
 
-    if(
-        map.getZoom()>=17
-    ){
-
-        map.removeLayer(
-            b.per100OddLabels
-        );
-
-        map.removeLayer(
-            b.per100EvenLabels
-        );
-
-        return;
-    }
-
+    /*
+       ODD
+    */
 
     if(
-        oddOn &&
+        state.per100Odd &&
+        zoomAllowed &&
         (
             allBlocksMode ||
             currentBlock===key
@@ -2709,8 +2820,13 @@ function updatePer100Labels(key){
     }
 
 
+    /*
+       EVEN
+    */
+
     if(
-        evenOn &&
+        state.per100Even &&
+        zoomAllowed &&
         (
             allBlocksMode ||
             currentBlock===key
@@ -2726,6 +2842,85 @@ function updatePer100Labels(key){
         );
 
     }
+}
+
+
+/* =========================================================
+   UPDATE BLOCK CHECKBOX UI
+========================================================= */
+
+function updateLayerCheckboxes(key){
+
+    const state =
+        layerState[key];
+
+
+    const src =
+        document.getElementById('srcOn');
+
+    const rec =
+        document.getElementById('recOn');
+
+    const sp =
+        document.getElementById('spOn');
+
+    const tr =
+        document.getElementById('trOn');
+
+    const odd =
+        document.getElementById('per100OddOn');
+
+    const even =
+        document.getElementById('per100EvenOn');
+
+
+    if(src)
+        src.checked=state.src;
+
+
+    if(rec)
+        rec.checked=state.rec;
+
+
+    if(sp)
+        sp.checked=state.sp;
+
+
+    if(tr)
+        tr.checked=state.tr;
+
+
+    if(odd)
+        odd.checked=state.per100Odd;
+
+
+    if(even)
+        even.checked=state.per100Even;
+}
+
+
+/* =========================================================
+   UPDATE HAZARD CHECKBOX UI
+========================================================= */
+
+function updateHazardCheckboxes(){
+
+    Object.keys(hazardConfig).forEach(key=>{
+
+        const cb =
+            document.getElementById(
+                hazardConfig[key].checkbox
+            );
+
+
+        if(cb){
+
+            cb.checked =
+                hazardState.east[key] || false;
+
+        }
+
+    });
 }
 
 
@@ -2775,8 +2970,15 @@ async function selectBlock(key){
 
 
     /*
-       East mempunyai hazard.
-       Central dan West belum mempunyai hazard.
+       Restore checkbox state
+       sesuai block.
+    */
+
+    updateLayerCheckboxes(key);
+
+
+    /*
+       Hazard hanya East.
     */
 
     const hazardSection =
@@ -2789,9 +2991,17 @@ async function selectBlock(key){
 
         hazardSection.style.display='block';
 
+        updateHazardCheckboxes();
+
     }else{
 
         hazardSection.style.display='none';
+
+        /*
+           Semua hazard East
+           dihapus dari map ketika
+           pindah ke Central/West.
+        */
 
         Object.keys(
             hazardLayers
@@ -2801,48 +3011,24 @@ async function selectBlock(key){
                 hazardLayers[h]
             );
 
-            const cb =
-                document.getElementById(
-                    hazardConfig[h].checkbox
-                );
-
-            if(cb)
-                cb.checked=false;
-
         });
 
     }
 
 
     /*
-       Per-100 hanya tersedia secara
-       khusus untuk East.
+       Per-100 tersedia untuk
+       SEMUA BLOCK sekarang.
     */
 
-    const oddRow =
-        document.getElementById(
-            'per100OddRow'
-        );
-
-    const evenRow =
-        document.getElementById(
-            'per100EvenRow'
-        );
+    document.getElementById(
+        'per100OddRow'
+    ).style.display='flex';
 
 
-    if(key==='east'){
-
-        oddRow.style.display='flex';
-
-        evenRow.style.display='flex';
-
-    }else{
-
-        oddRow.style.display='none';
-
-        evenRow.style.display='none';
-
-    }
+    document.getElementById(
+        'per100EvenRow'
+    ).style.display='flex';
 
 
     /*
@@ -2882,20 +3068,15 @@ async function selectBlock(key){
     const b =
         blocks[key];
 
+    const state =
+        layerState[key];
 
-    if(
-        document.getElementById(
-            'srcOn'
-        ).checked
-    )
+
+    if(state.src)
         b.source.addTo(map);
 
 
-    if(
-        document.getElementById(
-            'recOn'
-        ).checked
-    )
+    if(state.rec)
         b.receiver.addTo(map);
 
 
@@ -2945,8 +3126,47 @@ async function selectBlock(key){
     await refreshBlockPoints(key);
 
 
-    if(key==='east')
-        updatePer100Labels(key);
+    /*
+       Update label TRAS 100.
+    */
+
+    updatePer100Labels(key);
+
+
+    /*
+       Restore hazard East.
+    */
+
+    if(key==='east'){
+
+        Object.keys(
+            hazardState.east
+        ).forEach(h=>{
+
+            if(
+                hazardState.east[h]
+            ){
+
+                loadHazard(h)
+                .then(()=>{
+
+                    if(
+                        currentBlock==='east' &&
+                        hazardState.east[h]
+                    ){
+
+                        hazardLayers[h]
+                        .addTo(map);
+
+                    }
+
+                });
+
+            }
+
+        });
+
+    }
 
 
     updateStatus();
@@ -2985,14 +3205,6 @@ function showAllBlocks(){
         map.removeLayer(
             hazardLayers[h]
         );
-
-        const cb =
-            document.getElementById(
-                hazardConfig[h].checkbox
-            );
-
-        if(cb)
-            cb.checked=false;
 
     });
 
@@ -3049,26 +3261,16 @@ function showAllBlocks(){
 
 function toggleCurrentLine(type){
 
-    const id =
-        type==='src'
-            ? 'srcOn'
-            : 'recOn';
-
-
-    const checked =
-        document.getElementById(
-            id
-        ).checked;
-
-
-    if(
-        !currentBlock
-    )
+    if(!currentBlock)
         return;
 
 
     const b =
         blocks[currentBlock];
+
+
+    const state =
+        layerState[currentBlock];
 
 
     const layer =
@@ -3077,25 +3279,46 @@ function toggleCurrentLine(type){
             : b.receiver;
 
 
+    const checked =
+        document.getElementById(
+            type==='src'
+                ? 'srcOn'
+                : 'recOn'
+        ).checked;
+
+
+    if(type==='src')
+        state.src=checked;
+
+    else
+        state.rec=checked;
+
+
     if(checked){
 
         layer.addTo(map);
 
 
-        if(type==='rec')
+        if(type==='rec'){
+
             updateReceiverLabels(
                 currentBlock
             );
+
+        }
 
     }else{
 
         map.removeLayer(layer);
 
 
-        if(type==='rec')
+        if(type==='rec'){
+
             map.removeLayer(
                 b.receiverLabels
             );
+
+        }
 
     }
 }
@@ -3109,6 +3332,27 @@ function refreshCurrentPoints(){
 
     if(!currentBlock)
         return;
+
+
+    const state =
+        layerState[currentBlock];
+
+
+    const sp =
+        document.getElementById(
+            'spOn'
+        ).checked;
+
+
+    const tr =
+        document.getElementById(
+            'trOn'
+        ).checked;
+
+
+    state.sp=sp;
+
+    state.tr=tr;
 
 
     refreshBlockPoints(
@@ -3125,6 +3369,27 @@ function updateCurrentPer100Labels(){
 
     if(!currentBlock)
         return;
+
+
+    const state =
+        layerState[currentBlock];
+
+
+    const odd =
+        document.getElementById(
+            'per100OddOn'
+        ).checked;
+
+
+    const even =
+        document.getElementById(
+            'per100EvenOn'
+        ).checked;
+
+
+    state.per100Odd=odd;
+
+    state.per100Even=even;
 
 
     updatePer100Labels(
@@ -3309,8 +3574,7 @@ function loadHazard(key){
 function toggleHazard(key){
 
     /*
-       Hazard hanya boleh aktif
-       ketika EAST dipilih.
+       Hazard hanya East.
     */
 
     if(
@@ -3341,15 +3605,27 @@ function toggleHazard(key){
         return;
 
 
+    /*
+       Simpan state hazard.
+    */
+
+    hazardState.east[key] =
+        cb.checked;
+
+
     if(cb.checked){
 
         loadHazard(key)
         .then(()=>{
 
             if(
-                currentBlock==='east'
-            )
+                currentBlock==='east' &&
+                hazardState.east[key]
+            ){
+
                 layer.addTo(map);
+
+            }
 
         });
 
@@ -3612,8 +3888,21 @@ init();
 
 loadBlockPointsData('east')
 .then(()=>{
+
     loadEastPer100Labels();
+
 });
+
+
+/*
+   Load Central dan West lebih awal
+   supaya label TRAS 100 sudah siap
+   ketika block dipilih.
+*/
+
+loadBlockPointsData('central');
+
+loadBlockPointsData('west');
 
 </script>
 
